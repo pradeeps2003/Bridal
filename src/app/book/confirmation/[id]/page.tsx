@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MessageCircle } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -57,6 +58,15 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
   const svc = booking.services as { name: string } | undefined;
   const customer = booking.customers as { full_name: string; phone: string; whatsapp?: string } | undefined;
 
+  const whatsappNumRaw = siteSettings.whatsapp || siteSettings.phone || "918526475322";
+  const cleanNum = whatsappNumRaw.replace(/\D/g, "");
+  const formattedWa = cleanNum.length === 10 ? `91${cleanNum}` : cleanNum;
+
+  const waText = encodeURIComponent(
+    `Hi Glow with Rubi! I submitted a booking request.\n\n*Booking Ref:* #${id.slice(0, 8).toUpperCase()}\n*Name:* ${customer?.full_name || "Customer"}\n*Package:* ${pkg?.name || "Makeup Package"}\n*Date:* ${booking.event_date} at ${booking.start_time.slice(0, 5)}\n\nPlease review and confirm availability!`
+  );
+  const waUrl = `https://wa.me/${formattedWa}?text=${waText}`;
+
   return (
     <>
       <SiteHeader />
@@ -110,18 +120,40 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
           </div>
 
           {status === "HELD" && (
-            <div className="mt-6 rounded-sm bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 p-4 text-center text-sm text-[var(--color-accent)]">
-              <p className="font-semibold">Slot temporarily held</p>
-              <p className="mt-1 text-xs leading-relaxed">
-                We&apos;ll review your request and send the payment details via WhatsApp shortly.
-              </p>
+            <div className="mt-6 space-y-4">
+              <div className="rounded-lg bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 p-4 text-center text-sm text-[var(--color-accent)]">
+                <p className="font-semibold">Request Saved & Slot Temporarily Held</p>
+                <p className="mt-1 text-xs leading-relaxed">
+                  We&apos;ve received your request! You can tap below to send the details directly to Rubi on WhatsApp, or wait for admin approval.
+                </p>
+              </div>
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-emerald-700 min-h-[48px]"
+              >
+                <MessageCircle className="h-5 w-5" />
+                Send Request Details via WhatsApp
+              </a>
             </div>
           )}
 
           {status === "REQUESTED" && (
-            <p className="mt-6 text-center text-sm text-[var(--color-muted-foreground)]">
-              Custom quote request received. We&apos;ll contact you with pricing details.
-            </p>
+            <div className="mt-6 space-y-4">
+              <p className="text-center text-sm text-[var(--color-muted-foreground)]">
+                Custom quote request received. We&apos;ll contact you with pricing details.
+              </p>
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-emerald-700 min-h-[48px]"
+              >
+                <MessageCircle className="h-5 w-5" />
+                Send Quote Request via WhatsApp
+              </a>
+            </div>
           )}
 
           {status === "CONFIRMED" && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -69,6 +69,7 @@ export function BookingWizard({
   businessSettings,
   preselectedPackage,
 }: BookingWizardProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialPackage = preselectedPackage ?? searchParams.get("package") ?? "";
 
@@ -247,47 +248,15 @@ export function BookingWizard({
 
       const resData = await res.json();
       if (res.ok && resData.data?.id) {
-        bookingRef = resData.data.id.slice(0, 8).toUpperCase();
+        router.push(`/book/confirmation/${resData.data.id}`);
+        return;
+      } else {
+        throw new Error(resData.error || "Could not save booking");
       }
     } catch (err) {
       console.warn("[booking-wizard] Failed to save booking to DB, falling back to direct WhatsApp:", err);
+      window.location.assign(getWhatsAppUrl(whatsappNumber, "Hi Glow with Rubi! I would like to book a makeup appointment."));
     }
-
-    const addonSummary = selectedAddonItems.length
-      ? selectedAddonItems
-          .map((addon) => `${addon.name}${isNegotiableAddon(addon) ? " (to quote)" : ""}`)
-          .join(", ")
-      : "None";
-    const locationSummary = locationType === "home" ? `${address} (${pincode})` : "Studio";
-    const totalSummary = pricing?.is_custom_quote ? "Custom quote" : formatCurrency(finalTotal);
-    const advanceSummary =
-      pricing && !pricing.is_custom_quote && finalAdvance > 0
-        ? formatCurrency(finalAdvance)
-        : "To confirm";
-
-    const message = [
-      "Hi Glow with Rubi! I would like to book a makeup appointment.",
-      "",
-      bookingRef ? `*Booking Ref:* #${bookingRef}` : null,
-      `*Name:* ${fullName.trim()}`,
-      `*Phone:* ${phone.trim()}`,
-      email.trim() ? `*Email:* ${email.trim()}` : null,
-      `*Service:* ${selectedService?.name ?? "Makeup service"}`,
-      `*Package:* ${selectedPackage.name}`,
-      `*Date:* ${eventDate} at ${startTime}`,
-      `*Location:* ${locationSummary}`,
-      `*Add-ons:* ${addonSummary}`,
-      `*Total shown:* ${totalSummary}`,
-      `*Advance shown:* ${advanceSummary}`,
-      couponApplied && couponCode.trim() ? `*Coupon:* ${couponCode.trim()}` : null,
-      notes.trim() ? `*Notes:* ${notes.trim()}` : null,
-      "",
-      "Please confirm availability and the final price. I will tap Send here to submit this request.",
-    ]
-      .filter((line) => line !== null)
-      .join("\n");
-
-    window.location.assign(getWhatsAppUrl(whatsappNumber, message));
   }
 
   const minDate = new Date(Date.now() + bookingSettings.min_advance_hours * 3600000).toISOString().slice(0, 10);
@@ -777,7 +746,7 @@ export function BookingWizard({
           <div className="flex items-start gap-2 rounded-lg border border-[var(--color-border)] p-3 text-[10px] text-[var(--color-muted-foreground)]">
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-accent)]" />
             <p>
-              No date is held automatically. WhatsApp will open with these details; tap Send to submit your request. Rubi will confirm availability, final pricing, and next steps.
+              Your booking request will be saved directly into our system and opened on WhatsApp with your unique Booking Ref ID. Rubi will review and confirm your booking date.
             </p>
           </div>
 
@@ -787,7 +756,7 @@ export function BookingWizard({
               Back
             </Button>
             <Button variant="accent" className="h-10 flex-1" disabled={!canSubmit || submitting} onClick={handleSubmit}>
-              {submitting ? "Opening WhatsApp…" : pricing.is_custom_quote ? "Request quote on WhatsApp" : "Book via WhatsApp"}
+              {submitting ? "Saving & Opening WhatsApp…" : pricing.is_custom_quote ? "Submit Quote Request" : "Submit & Open WhatsApp"}
             </Button>
           </div>
         </div>

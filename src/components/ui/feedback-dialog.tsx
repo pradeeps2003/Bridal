@@ -22,7 +22,7 @@ export function FeedbackDialog({
   message,
   tone = "error",
   autoClose = true,
-  autoCloseDuration = 5000,
+  autoCloseDuration = 10000,
   onClose,
 }: FeedbackDialogProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -96,13 +96,8 @@ export function FeedbackDialog({
             <p id="feedback-dialog-message" className="mt-2 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
               {message}
             </p>
-            <div className="mt-5 flex items-center justify-between gap-2">
-              {autoClose && autoCloseDuration > 0 && (
-                <span className="text-[11px] text-[var(--color-muted-foreground)] font-medium">
-                  Auto-closing in {Math.round(autoCloseDuration / 1000)}s...
-                </span>
-              )}
-              <Button type="button" variant="outline" size="sm" className="ml-auto" onClick={onClose}>
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={onClose}>
                 Dismiss
               </Button>
             </div>

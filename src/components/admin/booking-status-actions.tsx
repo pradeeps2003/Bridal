@@ -119,7 +119,7 @@ export function BookingStatusActions({ bookingId, actions, customerPhone, custom
         message={feedback?.message ?? ""}
         tone={feedback?.tone ?? "success"}
         autoClose={true}
-        autoCloseDuration={5000}
+        autoCloseDuration={10000}
         onClose={() => setFeedback(null)}
       />
     </>
