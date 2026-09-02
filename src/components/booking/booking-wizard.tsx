@@ -201,25 +201,12 @@ export function BookingWizard({
   async function handleSubmit() {
     if (!selectedPackage) return;
     if (!validateContact()) {
-      setFeedback({ title: "Check your details", message: "Please correct the highlighted fields before opening WhatsApp." });
-      return;
-    }
-
-    const whatsappNumber = resolveWhatsAppNumber(
-      businessSettings.whatsapp || businessSettings.phone,
-    );
-
-    if (!whatsappNumber) {
-      const message = "WhatsApp booking is not configured yet. Please contact us directly.";
-      setError(message);
-      setFeedback({ title: "WhatsApp is unavailable", message });
+      setFeedback({ title: "Check your details", message: "Please correct the highlighted fields before submitting." });
       return;
     }
 
     setError(null);
     setSubmitting(true);
-
-
 
     try {
       const payload = {
@@ -248,13 +235,13 @@ export function BookingWizard({
       const resData = await res.json();
       if (res.ok && resData.data?.id) {
         router.push(`/book/confirmation/${resData.data.id}`);
-        return;
       } else {
-        throw new Error(resData.error || "Could not save booking");
+        throw new Error(resData.error || "Could not submit booking. Please try again.");
       }
     } catch (err) {
-      console.warn("[booking-wizard] Failed to save booking to DB, falling back to direct WhatsApp:", err);
-      window.location.assign(getWhatsAppUrl(whatsappNumber, "Hi Glow with Rubi! I would like to book a makeup appointment."));
+      const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setFeedback({ title: "Booking failed", message: msg });
+      setSubmitting(false);
     }
   }
 
@@ -745,7 +732,7 @@ export function BookingWizard({
           <div className="flex items-start gap-2 rounded-lg border border-[var(--color-border)] p-3 text-[10px] text-[var(--color-muted-foreground)]">
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-accent)]" />
             <p>
-              Your booking request will be saved directly into our system and opened on WhatsApp with your unique Booking Ref ID. Rubi will review and confirm your booking date.
+              Your request will be securely submitted. Rubi will review and confirm your booking date via WhatsApp.
             </p>
           </div>
 
@@ -755,7 +742,7 @@ export function BookingWizard({
               Back
             </Button>
             <Button variant="accent" className="h-10 flex-1" disabled={!canSubmit || submitting} onClick={handleSubmit}>
-              {submitting ? "Saving & Opening WhatsApp…" : pricing.is_custom_quote ? "Submit Quote Request" : "Submit & Open WhatsApp"}
+              {submitting ? "Submitting…" : pricing.is_custom_quote ? "Request a Quote" : "Book Now"}
             </Button>
           </div>
         </div>
