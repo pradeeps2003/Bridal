@@ -87,7 +87,7 @@ export function BookingWizard({
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [notes, setNotes] = useState("");
+
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
@@ -219,7 +219,7 @@ export function BookingWizard({
     setError(null);
     setSubmitting(true);
 
-    let bookingRef = "";
+
 
     try {
       const payload = {
@@ -230,7 +230,6 @@ export function BookingWizard({
         location_type: locationType,
         address: locationType === "home" ? address : undefined,
         pincode: locationType === "home" ? pincode : undefined,
-        notes: notes.trim() || undefined,
         coupon_code: couponApplied ? couponCode.trim() : undefined,
         customer: {
           full_name: fullName.trim(),
