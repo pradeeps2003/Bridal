@@ -1,6 +1,6 @@
 import { BookingLedger } from "@/components/admin/booking-ledger";
 import type { Booking } from "@/types";
-import { Users, CheckCircle2, Clock, XCircle, UserCheck, TrendingUp, Calendar, DollarSign, ArrowUpRight, ArrowDownRight, AlertCircle } from "lucide-react";
+import { Users, CheckCircle2, Clock, XCircle, UserCheck, TrendingUp, Calendar, DollarSign, AlertCircle } from "lucide-react";
 
 export function AdminDashboard({
   date,
@@ -121,7 +121,7 @@ export function AdminDashboard({
             <div className="flex-1">
               <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">Revenue</p>
               <p className="mt-2 font-[family-name:var(--font-heading)] text-3xl tabular-nums text-[var(--color-foreground)]">₹{todayRevenue.toLocaleString("en-IN")}</p>
-              <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">Today's earnings</p>
+              <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">Today&apos;s earnings</p>
             </div>
             <div className="rounded-full bg-emerald-500/10 p-2">
               <DollarSign className="h-5 w-5 text-emerald-500" />
