@@ -11,6 +11,8 @@ interface FeedbackDialogProps {
   title: string;
   message: string;
   tone?: "error" | "success" | "info";
+  autoClose?: boolean;
+  autoCloseDuration?: number;
   onClose: () => void;
 }
 
@@ -19,6 +21,8 @@ export function FeedbackDialog({
   title,
   message,
   tone = "error",
+  autoClose = true,
+  autoCloseDuration = 5000,
   onClose,
 }: FeedbackDialogProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -26,6 +30,14 @@ export function FeedbackDialog({
 
   useEffect(() => {
     if (!open) return;
+
+    let timer: NodeJS.Timeout | null = null;
+    if (autoClose && autoCloseDuration > 0) {
+      timer = setTimeout(() => {
+        onClose();
+      }, autoCloseDuration);
+    }
+
     previousFocus.current = document.activeElement as HTMLElement | null;
     closeButtonRef.current?.focus();
 
@@ -34,10 +46,11 @@ export function FeedbackDialog({
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => {
+      if (timer) clearTimeout(timer);
       document.removeEventListener("keydown", handleKeyDown);
       previousFocus.current?.focus();
     };
-  }, [onClose, open]);
+  }, [onClose, open, autoClose, autoCloseDuration]);
 
   if (!open) return null;
 
@@ -61,13 +74,13 @@ export function FeedbackDialog({
         aria-modal="true"
         aria-labelledby="feedback-dialog-title"
         aria-describedby="feedback-dialog-message"
-        className="w-full max-w-md rounded-sm border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-2xl"
+        className="relative overflow-hidden w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-2xl animate-in fade-in zoom-in duration-200"
       >
         <div className="flex items-start gap-4">
-          <Icon className={cn("mt-0.5 h-5 w-5 shrink-0", iconClass)} aria-hidden="true" />
+          <Icon className={cn("mt-0.5 h-6 w-6 shrink-0", iconClass)} aria-hidden="true" />
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-4">
-              <h2 id="feedback-dialog-title" className="font-[family-name:var(--font-heading)] text-xl">
+              <h2 id="feedback-dialog-title" className="font-[family-name:var(--font-heading)] text-xl font-semibold">
                 {title}
               </h2>
               <button
@@ -75,7 +88,7 @@ export function FeedbackDialog({
                 type="button"
                 onClick={onClose}
                 aria-label="Close message"
-                className="rounded-sm p-1 text-[var(--color-muted-foreground)] transition-colors hover:bg-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+                className="rounded-md p-1 text-[var(--color-muted-foreground)] transition-colors hover:bg-[var(--color-muted)] hover:text-[var(--color-foreground)]"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -83,11 +96,39 @@ export function FeedbackDialog({
             <p id="feedback-dialog-message" className="mt-2 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
               {message}
             </p>
-            <Button type="button" variant="outline" size="sm" className="mt-5" onClick={onClose}>
-              Close
-            </Button>
+            <div className="mt-5 flex items-center justify-between gap-2">
+              {autoClose && autoCloseDuration > 0 && (
+                <span className="text-[11px] text-[var(--color-muted-foreground)] font-medium">
+                  Auto-closing in {Math.round(autoCloseDuration / 1000)}s...
+                </span>
+              )}
+              <Button type="button" variant="outline" size="sm" className="ml-auto" onClick={onClose}>
+                Dismiss
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* 5-second animated progress bar */}
+        {autoClose && autoCloseDuration > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-[var(--color-muted)]/30">
+            <div
+              className={cn(
+                "h-full transition-all ease-linear",
+                tone === "success" ? "bg-emerald-500" : tone === "info" ? "bg-[var(--color-accent)]" : "bg-red-500"
+              )}
+              style={{
+                animation: `shrinkWidth ${autoCloseDuration}ms linear forwards`,
+              }}
+            />
+            <style jsx>{`
+              @keyframes shrinkWidth {
+                from { width: 100%; }
+                to { width: 0%; }
+              }
+            `}</style>
+          </div>
+        )}
       </div>
     </div>
   );
