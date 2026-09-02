@@ -45,7 +45,7 @@ export default function AboutPage() {
         </div>
         <div className="flex flex-col justify-center space-y-4">
           <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-            With over three years in luxury bridal work, We're known for our skin-first approach to bridal makeup. We focus on colour correction and light placement. Looks are built around wardrobe, jewellery, and venue lighting.
+            With over three years in luxury bridal work, We&apos;re known for our skin-first approach to bridal makeup. We focus on colour correction and light placement. Looks are built around wardrobe, jewellery, and venue lighting.
           </p>
           <Button variant="modern" asChild className="h-11 w-full sm:w-auto">
             <Link href="/book">Book Your Date</Link>
