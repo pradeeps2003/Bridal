@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/expire-holds",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/post-event-reviews",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/booking-reminders",
+      "schedule": "0 4 * * *"
+    }
+  ]
+}
