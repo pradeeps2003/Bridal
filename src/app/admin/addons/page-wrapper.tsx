@@ -20,7 +20,7 @@ export function AddonsPageWrapper({ addons }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
