@@ -197,7 +197,7 @@ export function BookingWizard({
     }
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!selectedPackage) return;
     if (!validateContact()) {
       setFeedback({ title: "Check your details", message: "Please correct the highlighted fields before opening WhatsApp." });
@@ -215,6 +215,44 @@ export function BookingWizard({
       return;
     }
 
+    setError(null);
+    setSubmitting(true);
+
+    let bookingRef = "";
+
+    try {
+      const payload = {
+        package_id: packageId,
+        addon_ids: selectedAddons,
+        event_date: eventDate,
+        start_time: startTime,
+        location_type: locationType,
+        address: locationType === "home" ? address : undefined,
+        pincode: locationType === "home" ? pincode : undefined,
+        notes: notes.trim() || undefined,
+        coupon_code: couponApplied ? couponCode.trim() : undefined,
+        customer: {
+          full_name: fullName.trim(),
+          phone: phone.trim(),
+          email: email.trim() || undefined,
+          whatsapp: phone.trim(),
+        },
+      };
+
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const resData = await res.json();
+      if (res.ok && resData.data?.id) {
+        bookingRef = resData.data.id.slice(0, 8).toUpperCase();
+      }
+    } catch (err) {
+      console.warn("[booking-wizard] Failed to save booking to DB, falling back to direct WhatsApp:", err);
+    }
+
     const addonSummary = selectedAddonItems.length
       ? selectedAddonItems
           .map((addon) => `${addon.name}${isNegotiableAddon(addon) ? " (to quote)" : ""}`)
@@ -230,6 +268,7 @@ export function BookingWizard({
     const message = [
       "Hi Glow with Rubi! I would like to book a makeup appointment.",
       "",
+      bookingRef ? `*Booking Ref:* #${bookingRef}` : null,
       `*Name:* ${fullName.trim()}`,
       `*Phone:* ${phone.trim()}`,
       email.trim() ? `*Email:* ${email.trim()}` : null,
@@ -248,8 +287,6 @@ export function BookingWizard({
       .filter((line) => line !== null)
       .join("\n");
 
-    setError(null);
-    setSubmitting(true);
     window.location.assign(getWhatsAppUrl(whatsappNumber, message));
   }
 

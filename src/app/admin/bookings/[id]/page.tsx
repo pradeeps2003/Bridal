@@ -119,7 +119,12 @@ export default async function AdminBookingDetailPage({ params }: PageProps) {
                   ) : null}
                 </div>
               ) : null}
-              <BookingStatusActions bookingId={id} actions={actions} />
+              <BookingStatusActions
+                bookingId={id}
+                actions={actions}
+                customerPhone={customer?.phone}
+                customerName={customer?.full_name}
+              />
               {payments.length > 0 && (
                 <div className="space-y-2 text-sm">
                   <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-muted-foreground)]">Payments</p>
