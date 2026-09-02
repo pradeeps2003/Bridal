@@ -16,8 +16,9 @@ export function AdminDashboard({
   const completed = todayBookings.filter((booking) => ["COMPLETED"].includes(booking.status));
   const cancelled = todayBookings.filter((booking) => ["CANCELLED", "REJECTED", "EXPIRED"].includes(booking.status));
   const totalBookings = todayBookings.length;
-  const todayRevenue = todayBookings.reduce((sum, booking) => sum + (Number(booking.total) || 0), 0);
-  const averageBookingValue = totalBookings > 0 ? todayRevenue / totalBookings : 0;
+  const validBookings = todayBookings.filter((booking) => !["CANCELLED", "REJECTED", "EXPIRED"].includes(booking.status));
+  const todayRevenue = validBookings.reduce((sum, booking) => sum + (Number(booking.total) || 0), 0);
+  const averageBookingValue = validBookings.length > 0 ? todayRevenue / validBookings.length : 0;
 
   return (
     <div className="space-y-6">

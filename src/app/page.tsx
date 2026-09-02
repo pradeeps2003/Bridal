@@ -10,6 +10,8 @@ import { getActivePackages } from "@/lib/data/packages";
 import { getPublishedTestimonials } from "@/lib/data/testimonials";
 import { QuickStartGuide } from "@/components/onboarding/quick-start-guide";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [bridalPackages, testimonials] = await Promise.all([
     getActivePackages({ serviceSlug: "bridal", limit: 3 }),

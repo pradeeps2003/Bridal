@@ -18,6 +18,8 @@ interface PageProps {
   searchParams: Promise<{ service?: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function PackagesPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const activeServiceSlug = params.service;

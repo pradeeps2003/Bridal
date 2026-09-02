@@ -11,6 +11,8 @@ import {
 } from "@/lib/data/settings";
 import { getActiveServices } from "@/lib/data/services";
 
+export const dynamic = "force-dynamic";
+
 export default async function BookPage() {
   const [services, packages, addons, bookingSettings, paymentSettings, serviceSettings, businessSettings] =
     await Promise.all([
