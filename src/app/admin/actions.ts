@@ -588,6 +588,17 @@ export async function updateAllSettingsAction(formData: FormData) {
     showcaseSlots,
   );
 
+  // Parse featured package IDs from form data
+  const featuredPackageIds: string[] = [];
+  let pkgIndex = 1;
+  while (formData.has(`featured_package_${pkgIndex}`)) {
+    const id = formData.get(`featured_package_${pkgIndex}`) as string;
+    if (id && id.trim()) {
+      featuredPackageIds.push(id.trim());
+    }
+    pkgIndex++;
+  }
+
   // Update all settings in parallel
   await Promise.all([
     updateSiteSetting(
@@ -603,6 +614,7 @@ export async function updateAllSettingsAction(formData: FormData) {
         admin_login_image_url: adminLoginImageUrl,
         hero_image_urls: showcaseImageUrls,
         footer_image_urls: showcaseImageUrls,
+        featured_package_ids: featuredPackageIds,
       },
       admin.id,
     ),

@@ -118,6 +118,7 @@ export interface SiteSettings {
   admin_login_image_url?: string | null;
   hero_image_urls?: string[];
   footer_image_urls?: string[];
+  featured_package_ids?: string[];
 }
 
 export interface BookingSettings {

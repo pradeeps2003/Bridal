@@ -39,6 +39,10 @@ export function SettingsPageWrapper({
 
     try {
       const formData = new FormData(e.currentTarget);
+      // Add selected packages to form data
+      selectedPackages.forEach((id, index) => {
+        formData.append(`featured_package_${index + 1}`, id);
+      });
       await updateAllSettingsAction(formData);
       showNotification("success", "Settings saved successfully!");
 
@@ -215,6 +219,54 @@ export function SettingsPageWrapper({
                   </div>
                   <p className="mt-3 text-xs text-(--color-muted-foreground)">{checkout.coupons_enabled ? "Coupon entry is available at checkout." : "Coupon entry is hidden at checkout."}</p>
                 </fieldset>
+              </div>
+            </section>
+
+            <section className="rounded-(--radius-xl) border border-(--color-border) bg-(--color-card) lg:col-span-2">
+              <header className="border-b border-(--color-border) bg-(--color-muted)/30 px-5 py-4"><div className="flex items-center gap-3"><Settings className="h-5 w-5 text-(--color-secondary)" aria-hidden="true" /><div><h2 className="font-[family-name:var(--font-heading)] text-xl text-(--color-foreground)">Featured packages</h2><p className="mt-1 text-xs text-(--color-muted-foreground)">Select up to 8 packages to display on the homepage instead of auto-selected ones.</p></div></div></header>
+              <div className="space-y-4 p-5">
+                {loadingPackages ? (
+                  <p className="text-xs text-(--color-muted-foreground)">Loading packages...</p>
+                ) : allPackages.length === 0 ? (
+                  <p className="text-xs text-(--color-muted-foreground)">No packages available. Create packages first.</p>
+                ) : (
+                  <>
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {allPackages.map((pkg) => (
+                        <label key={pkg.id} className="flex items-center gap-3 rounded-(--radius-md) border border-(--color-border) p-3 cursor-pointer hover:bg-(--color-muted)/30 transition">
+                          <input
+                            type="checkbox"
+                            checked={selectedPackages.includes(pkg.id)}
+                            onChange={(e) => {
+                              if (e.target.checked && selectedPackages.length < 8) {
+                                setSelectedPackages([...selectedPackages, pkg.id]);
+                              } else if (!e.target.checked) {
+                                setSelectedPackages(selectedPackages.filter(id => id !== pkg.id));
+                              }
+                            }}
+                            className="accent-(--color-accent)"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-(--color-foreground) truncate">{pkg.name}</p>
+                            <p className="text-xs text-(--color-muted-foreground)">₹{pkg.price}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between border-t border-(--color-border) pt-3 text-xs text-(--color-muted-foreground)">
+                      <span>{selectedPackages.length}/8 selected</span>
+                      {selectedPackages.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPackages([])}
+                          className="text-(--color-accent) hover:underline flex items-center gap-1"
+                        >
+                          <X className="h-3 w-3" /> Clear
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </section>
 

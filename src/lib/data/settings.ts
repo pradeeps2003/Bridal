@@ -23,6 +23,7 @@ const DEFAULT_BUSINESS: SiteSettings = {
   admin_login_image_url: DEFAULT_AUTH_IMAGES.admin,
   hero_image_urls: [...DEFAULT_HERO_IMAGE_URLS],
   footer_image_urls: [...DEFAULT_FOOTER_IMAGE_URLS],
+  featured_package_ids: [],
 };
 
 const DEFAULT_BOOKING: BookingSettings = {
@@ -121,6 +122,10 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     heroImageUrls,
   );
 
+  const featuredIds = Array.isArray((business as { featured_package_ids?: unknown }).featured_package_ids)
+    ? ((business as { featured_package_ids?: string[] }).featured_package_ids ?? [])
+    : [];
+
   return {
     business_name: (business as { name?: string }).name ?? DEFAULT_BUSINESS.business_name,
     phone: (business as { phone?: string }).phone || DEFAULT_BUSINESS.phone,
@@ -135,6 +140,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         : DEFAULT_BUSINESS.admin_login_image_url,
     hero_image_urls: heroImageUrls,
     footer_image_urls: footerImageUrls,
+    featured_package_ids: featuredIds,
   };
 }
 
