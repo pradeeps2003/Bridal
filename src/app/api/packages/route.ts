@@ -10,14 +10,17 @@ export async function GET() {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=300", // Cache for 5 min on server and client
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600, stale-if-error=86400",
       },
     });
   } catch (error) {
     console.error("Failed to fetch packages:", error);
     return new Response(JSON.stringify({ error: "Failed to fetch packages" }), {
       status: 500,
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+      },
     });
   }
 }

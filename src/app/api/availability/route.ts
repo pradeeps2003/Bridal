@@ -24,7 +24,11 @@ export async function GET(request: Request) {
       parsed.data.package_id,
       parsed.data.location_type ?? "home",
     );
-    return NextResponse.json({ data: slots });
+    return NextResponse.json({ data: slots }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600, stale-if-error=86400",
+      },
+    });
   } catch (err) {
     console.error("[availability] error:", err);
     return NextResponse.json({ error: "Failed to fetch availability" }, { status: 500 });

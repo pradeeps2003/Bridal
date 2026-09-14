@@ -37,6 +37,7 @@
     "@types/node": "^22.15.29",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
+    "artillery": "^2.0.33",
     "eslint": "^9.28.0",
     "eslint-config-next": "^15.3.3",
     "rimraf": "^5.0.1",
