@@ -4,7 +4,7 @@ import { getDashboardStats } from "@/lib/data/admin";
 import { getBookings } from "@/lib/data/bookings";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-export const revalidate = 60; // Cache for 1 minute
+export const revalidate = 300; // Cache for 5 minutes
 
 export default async function AdminDashboardPage() {
   const date = new Date().toISOString().slice(0, 10);
