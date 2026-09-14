@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminNotification } from "@/components/ui/admin-notification";
 import type { SiteSettings, BookingSettings, PaymentSettings, ServiceSettings, CheckoutSettings } from "@/types";
-import { Bell, Building2, Car, CreditCard, Settings } from "lucide-react";
+import { Bell, Building2, Car, CreditCard, Settings, X } from "lucide-react";
 
 export function SettingsPageWrapper({
   initialSettings,

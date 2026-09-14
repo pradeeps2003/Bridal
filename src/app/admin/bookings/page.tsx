@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { AdminShell } from "@/components/admin/admin-shell";
 import { StatusBadge } from "@/components/booking/payment-button";
-import { Badge } from "@/components/ui/badge";
 import { getBookings } from "@/lib/data/bookings";
 import { formatCurrency } from "@/lib/utils";
 import type { BookingStatus } from "@/types";
