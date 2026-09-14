@@ -123,6 +123,9 @@ export function SettingsPageWrapper({
             </header>
             <div className="grid gap-5 p-5 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
               <div className="space-y-4">
+                <div className="rounded-(--radius-lg) border border-dashed border-(--color-border) p-4 text-xs leading-relaxed text-(--color-muted-foreground)">
+                  The shared gallery is used in two places: the homepage showcase cards and the footer strip. Remove all images if you want to hide both sections.
+                </div>
                 <div className="rounded-(--radius-lg) border border-(--color-border) bg-(--color-muted)/20 p-4">
                   <p className="text-sm font-semibold text-(--color-foreground)">Admin login image</p>
                   <p className="mt-1 text-xs leading-relaxed text-(--color-muted-foreground)">
@@ -134,12 +137,8 @@ export function SettingsPageWrapper({
                       name="admin_login_image_file"
                       label="Studio login image"
                       currentUrl={business.admin_login_image_url}
-                      clearName="admin_login_image_clear"
                     />
                   </div>
-                </div>
-                <div className="rounded-(--radius-lg) border border-dashed border-(--color-border) p-4 text-xs leading-relaxed text-(--color-muted-foreground)">
-                  The shared gallery is used in two places: the homepage showcase cards and the footer strip. Remove all images if you want to hide both sections.
                 </div>
               </div>
 
