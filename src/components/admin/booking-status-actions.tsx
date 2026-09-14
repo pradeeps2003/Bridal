@@ -128,10 +128,10 @@ export function BookingStatusActions({
             disabled={pendingStatus !== null}
             className="min-h-[44px]"
           >
-            {pendingStatus === action.status ? "Updating…" : action.label}
+            {pendingStatus === action.status ? "Updating..." : action.label}
           </Button>
         ))}
-        {remainingBalance > 0 && (
+        {remainingBalance > 0 ? (
           <Button
             type="button"
             variant="accent"
@@ -140,10 +140,10 @@ export function BookingStatusActions({
             disabled={pendingStatus !== null}
             className="min-h-[44px]"
           >
-            {pendingStatus === "BALANCE" ? "Saving…" : "Mark balance paid"}
+            {pendingStatus === "BALANCE" ? "Saving..." : "Mark balance paid"}
           </Button>
-        )}
-        {customerPhone && (
+        ) : null}
+        {customerPhone ? (
           <Button
             type="button"
             variant="outline"
@@ -154,7 +154,7 @@ export function BookingStatusActions({
             <MessageCircle className="mr-2 h-4 w-4" />
             Send WhatsApp Update
           </Button>
-        )}
+        ) : null}
       </div>
       <FeedbackDialog
         open={!!feedback}
