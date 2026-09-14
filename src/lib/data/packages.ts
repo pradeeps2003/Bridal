@@ -84,7 +84,9 @@ export async function getActivePackages(options?: {
       query = query.limit(options.limit);
     }
 
-    let { data, error } = await query;
+    const initial = await query;
+    let data = initial.data as DbPackageRow[] | null;
+    let error = initial.error;
 
     if (isMissingPackageType(error)) {
       let fallbackQuery = supabase
@@ -99,7 +101,7 @@ export async function getActivePackages(options?: {
         fallbackQuery = fallbackQuery.limit(options.limit);
       }
       const retry = await fallbackQuery;
-      data = retry.data;
+      data = retry.data as DbPackageRow[] | null;
       error = retry.error;
     }
 
