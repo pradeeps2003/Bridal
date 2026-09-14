@@ -1,6 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { DEFAULT_AUTH_IMAGES, DEFAULT_FOOTER_IMAGE_URLS, DEFAULT_HERO_IMAGE_URLS } from "@/lib/brand-media";
+import { getSupabasePublicConfig, isSupabaseConfigured } from "@/lib/supabase/config";
 import type {
   AboutSettings,
   BookingSettings,
@@ -18,6 +20,9 @@ const DEFAULT_BUSINESS: SiteSettings = {
   email: "",
   address: "Vettaikaranpudur, Pollachi, Coimbatore district, Tamil Nadu",
   google_review_url: "",
+  admin_login_image_url: DEFAULT_AUTH_IMAGES.admin,
+  hero_image_urls: [...DEFAULT_HERO_IMAGE_URLS],
+  footer_image_urls: [...DEFAULT_FOOTER_IMAGE_URLS],
 };
 
 const DEFAULT_BOOKING: BookingSettings = {
@@ -67,7 +72,11 @@ async function fetchSetting<T>(key: string, fallback: T): Promise<T> {
   if (!isSupabaseConfigured()) return fallback;
 
   try {
-    const supabase = await createClient();
+    const config = getSupabasePublicConfig();
+    if (!config) return fallback;
+    const supabase = createSupabaseClient(config.url, config.anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const { data, error } = await supabase
       .from("site_settings")
       .select("value")
@@ -81,6 +90,13 @@ async function fetchSetting<T>(key: string, fallback: T): Promise<T> {
   }
 }
 
+function normalizeImageUrls(value: unknown, fallback: readonly string[]) {
+  const urls = Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    : [];
+  return urls.length ? urls : [...fallback];
+}
+
 export async function getSiteSettings(): Promise<SiteSettings> {
   const business = await fetchSetting("business", {
     name: DEFAULT_BUSINESS.business_name,
@@ -90,6 +106,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     email: "",
     address: "",
     google_review_url: "",
+    admin_login_image_url: DEFAULT_BUSINESS.admin_login_image_url,
+    hero_image_urls: DEFAULT_BUSINESS.hero_image_urls,
+    footer_image_urls: DEFAULT_BUSINESS.footer_image_urls,
   });
 
   return {
@@ -100,6 +119,18 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     email: (business as { email?: string }).email ?? "",
     address: (business as { address?: string }).address ?? "",
     google_review_url: (business as { google_review_url?: string }).google_review_url ?? "",
+    admin_login_image_url:
+      typeof (business as { admin_login_image_url?: unknown }).admin_login_image_url === "string"
+        ? ((business as { admin_login_image_url?: string }).admin_login_image_url ?? DEFAULT_BUSINESS.admin_login_image_url)
+        : DEFAULT_BUSINESS.admin_login_image_url,
+    hero_image_urls: normalizeImageUrls(
+      (business as { hero_image_urls?: unknown }).hero_image_urls,
+      DEFAULT_HERO_IMAGE_URLS,
+    ),
+    footer_image_urls: normalizeImageUrls(
+      (business as { footer_image_urls?: unknown }).footer_image_urls,
+      DEFAULT_FOOTER_IMAGE_URLS,
+    ),
   };
 }
 

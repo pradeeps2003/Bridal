@@ -1,6 +1,7 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
 import { SEED_PACKAGES } from "@/lib/data/seed";
-import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getSupabasePublicConfig, isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Package, PricingType } from "@/types";
 
 const PACKAGE_SELECT =
@@ -27,6 +28,19 @@ interface DbPackageRow {
   package_type?: Package["package_type"];
   package_items?: { label: string; display_order: number }[];
   services?: { slug: string } | { slug: string }[];
+}
+
+function createPackagesClient() {
+  const config = getSupabasePublicConfig();
+  if (!config) {
+    throw new Error(
+      "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local",
+    );
+  }
+
+  return createSupabaseClient(config.url, config.anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 function mapPackage(row: DbPackageRow): Package {
@@ -69,7 +83,7 @@ export async function getActivePackages(options?: {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPackagesClient();
     let query = supabase
       .from("packages")
       .select(PACKAGE_SELECT_WITH_TYPE)
@@ -130,7 +144,7 @@ export async function getAllPackages(): Promise<Package[]> {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPackagesClient();
     const { data, error } = await supabase
       .from("packages")
       .select(
@@ -155,7 +169,7 @@ export async function getPackageBySlug(slug: string): Promise<Package | null> {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPackagesClient();
     const { data, error } = await supabase
       .from("packages")
       .select(

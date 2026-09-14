@@ -115,6 +115,9 @@ export interface SiteSettings {
   email: string;
   address: string;
   google_review_url?: string;
+  admin_login_image_url?: string | null;
+  hero_image_urls?: string[];
+  footer_image_urls?: string[];
 }
 
 export interface BookingSettings {

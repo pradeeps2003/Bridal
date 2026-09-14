@@ -7,7 +7,7 @@ import { z } from "zod";
 import { getCurrentAdmin } from "@/lib/data/admin";
 import { canAdmin } from "@/lib/auth/permissions";
 import type { AdminPermission } from "@/lib/notifications/types";
-import { logAudit, updateSiteSetting, getAllSettings, getAboutSettings } from "@/lib/data/settings";
+import { getAboutSettings, getAllSettings, getSiteSettings, logAudit, updateSiteSetting } from "@/lib/data/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isUploadFile, uploadAdminImage } from "@/lib/media/storage";
@@ -41,6 +41,32 @@ function slugify(text: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+async function resolveSettingsImage(
+  formData: FormData,
+  fieldName: string,
+  existingUrl: string | null | undefined,
+) {
+  const file = formData.get(fieldName);
+  return isUploadFile(file)
+    ? (await uploadAdminImage(file, "branding")).publicUrl
+    : (existingUrl ?? null);
+}
+
+async function resolveSettingsImageList(
+  formData: FormData,
+  prefix: string,
+  existingUrls: string[] | undefined,
+  slots: number,
+) {
+  const current = existingUrls?.slice(0, slots) ?? [];
+  const uploads = await Promise.all(
+    Array.from({ length: slots }, (_, index) =>
+      resolveSettingsImage(formData, `${prefix}${index}`, current[index] ?? null),
+    ),
+  );
+  return uploads.filter((url): url is string => typeof url === "string" && url.trim().length > 0);
 }
 
 // --- Services ---
@@ -449,12 +475,14 @@ export async function deletePortfolioItem(id: string) {
 // --- Settings ---
 
 export async function getAdminSettingsAction() {
-  const { admin } = await requireAdmin("settings.manage");
+  await requireAdmin("settings.manage");
   return getAllSettings();
 }
 
 export async function updateBusinessSettings(formData: FormData) {
   const { admin } = await requireAdmin("settings.manage");
+  const existing = await getSiteSettings();
+
   await updateSiteSetting(
     "business",
     {
@@ -465,10 +493,28 @@ export async function updateBusinessSettings(formData: FormData) {
       email: formData.get("email"),
       address: formData.get("address"),
       google_review_url: formData.get("google_review_url"),
+      admin_login_image_url: await resolveSettingsImage(
+        formData,
+        "admin_login_image_file",
+        existing.admin_login_image_url,
+      ),
+      hero_image_urls: await resolveSettingsImageList(
+        formData,
+        "hero_image_file_",
+        existing.hero_image_urls,
+        5,
+      ),
+      footer_image_urls: await resolveSettingsImageList(
+        formData,
+        "footer_image_file_",
+        existing.footer_image_urls,
+        6,
+      ),
     },
     admin.id,
   );
   revalidatePath("/admin/settings");
+  revalidatePath("/", "layout");
 }
 
 export async function updateBookingSettingsAction(formData: FormData) {
@@ -520,8 +566,25 @@ export async function updateServiceSettingsAction(formData: FormData) {
 
 export async function updateAllSettingsAction(formData: FormData) {
   const { admin } = await requireAdmin("settings.manage");
-  
+  const existing = await getSiteSettings();
   const couponsEnabled = formData.get("coupons_enabled") === "true";
+  const adminLoginImageUrl = await resolveSettingsImage(
+    formData,
+    "admin_login_image_file",
+    existing.admin_login_image_url,
+  );
+  const heroImageUrls = await resolveSettingsImageList(
+    formData,
+    "hero_image_file_",
+    existing.hero_image_urls,
+    5,
+  );
+  const footerImageUrls = await resolveSettingsImageList(
+    formData,
+    "footer_image_file_",
+    existing.footer_image_urls,
+    6,
+  );
 
   // Update all settings in parallel
   await Promise.all([
@@ -535,6 +598,9 @@ export async function updateAllSettingsAction(formData: FormData) {
         email: formData.get("email"),
         address: formData.get("address"),
         google_review_url: formData.get("google_review_url"),
+        admin_login_image_url: adminLoginImageUrl,
+        hero_image_urls: heroImageUrls,
+        footer_image_urls: footerImageUrls,
       },
       admin.id,
     ),
@@ -574,7 +640,12 @@ export async function updateAllSettingsAction(formData: FormData) {
   ]);
   
   revalidatePath("/admin/settings");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/login");
+  revalidatePath("/login");
+  revalidatePath("/signup");
+  revalidatePath("/forgot-password");
+  revalidatePath("/reset-password");
 }
 
 const adminRoleSchema = z.object({

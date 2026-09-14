@@ -4,13 +4,16 @@ import Link from "next/link";
 import { AdminLoginForm } from "@/components/admin/login-form";
 import { AUTH_IMAGES, AuthSplitScreen } from "@/components/auth/auth-split-screen";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { getSiteSettings } from "@/lib/data/settings";
 
-export default function AdminLoginPage() {
+export default async function AdminLoginPage() {
+  const settings = await getSiteSettings();
+
   return (
     <AuthSplitScreen
       title="Studio login"
       description="Owner dashboard. Clients use the public login."
-      imageSrc={AUTH_IMAGES.admin}
+      imageSrc={settings.admin_login_image_url || AUTH_IMAGES.admin}
       imageAlt="Studio makeup styling"
       imageKicker="Studio"
       imageQuote="The dressing-room view — bookings, looks, and the calendar in one place."

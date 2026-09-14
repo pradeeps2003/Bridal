@@ -6,30 +6,30 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Sparkles, Star } from "lucide-react";
 
+import { DEFAULT_HERO_IMAGE_URLS } from "@/lib/brand-media";
 import { Button } from "@/components/ui/button";
 import SocialCards from "@/components/ui/card-fan-carousel";
 import { packagesToServices, ServiceCarousel } from "@/components/ui/services-card";
 import { ScrollAnimate } from "@/components/ui/scroll-animate";
 import type { Package } from "@/types";
 
-const FAN_CARDS = [
-  { imgUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80", alt: "Bridal ceremony look", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&q=80", alt: "Makeup close-up", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80", alt: "Portrait glow", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=800&q=80", alt: "Studio styling", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=80", alt: "Occasion glam", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=80", alt: "Reception look", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800&q=80", alt: "Engagement makeup", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80", alt: "Soft glam", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800&q=80", alt: "Wedding day", linkUrl: "/packages" },
-  { imgUrl: "https://images.unsplash.com/photo-1511285560929-80b456503681?w=800&q=80", alt: "Celebratory look", linkUrl: "/packages" },
-];
-
 const MARQUEE = ["HD makeup", "Saree draping", "Jewellery setting", "Home service", "Reception glam", "Engagement looks"];
 
 const POPULAR_TYPES = new Set(["popular", "most_ordered", "premium"]);
 
-export function HeroSection({ className }: { className?: string }) {
+export function HeroSection({
+  className,
+  imageUrls = [...DEFAULT_HERO_IMAGE_URLS],
+}: {
+  className?: string;
+  imageUrls?: string[];
+}) {
+  const fanCards = imageUrls.map((imgUrl, index) => ({
+    imgUrl,
+    alt: `Glow with Rubi showcase look ${index + 1}`,
+    linkUrl: "/packages",
+  }));
+
   return (
     <section
       className={`relative isolate overflow-hidden bg-[var(--color-background)] pt-20 sm:pt-24 ${className ?? ""}`}
@@ -77,7 +77,7 @@ export function HeroSection({ className }: { className?: string }) {
         </motion.div>
       </div>
 
-      <SocialCards cards={FAN_CARDS} />
+      <SocialCards cards={fanCards} />
 
       <div className="relative z-10 overflow-hidden border-t border-[var(--color-border)] py-3">
         <div className="flex w-max animate-[marquee-x_28s_linear_infinite] gap-10 pr-10 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">

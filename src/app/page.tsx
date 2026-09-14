@@ -7,14 +7,16 @@ import {
   TestimonialsSection,
 } from "@/components/sections/home-sections";
 import { getActivePackages } from "@/lib/data/packages";
+import { getSiteSettings } from "@/lib/data/settings";
 import { getPublishedTestimonials } from "@/lib/data/testimonials";
 
 export const revalidate = 300; // Cache for 5 minutes
 
 export default async function HomePage() {
-  const [bridalPackages, testimonials] = await Promise.all([
+  const [bridalPackages, testimonials, siteSettings] = await Promise.all([
     getActivePackages({ serviceSlug: "bridal", limit: 4 }),
     getPublishedTestimonials(),
+    getSiteSettings(),
   ]);
 
   const formattedTestimonials = testimonials.length > 0
@@ -30,7 +32,7 @@ export default async function HomePage() {
     <>
       <SiteHeader />
       <main className="bg-[var(--color-background)]">
-        <HeroSection />
+        <HeroSection imageUrls={siteSettings.hero_image_urls} />
         <FeaturedPackagesSection packages={bridalPackages} />
         <TestimonialsSection testimonials={formattedTestimonials} />
         <FaqPreviewSection />

@@ -5,7 +5,7 @@ export const SITE_ASSETS_BUCKET = "site-assets";
 export const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 export const TARGET_IMAGE_BYTES = 50 * 1024;
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
-export type ImageUploadScope = "packages" | "portfolio" | "about";
+export type ImageUploadScope = "packages" | "portfolio" | "about" | "branding";
 
 export interface ImageUploadResult {
   publicUrl: string;

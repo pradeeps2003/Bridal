@@ -2,20 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { DEFAULT_FOOTER_IMAGE_URLS } from "@/lib/brand-media";
+import { getSiteSettings } from "@/lib/data/settings";
 
 const DEVELOPER = {
   name: "Pradeep",
   email: "gokulpradeep2003@gmail.com",
 };
-
-const footerLooks = [
-  "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80",
-  "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80",
-  "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80",
-  "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&q=80",
-  "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&q=80",
-  "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=400&q=80",
-];
 
 const footerLinks = {
   explore: [
@@ -36,7 +29,12 @@ const footerLinks = {
   ],
 };
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const settings = await getSiteSettings();
+  const footerLooks = settings.footer_image_urls?.length
+    ? settings.footer_image_urls
+    : [...DEFAULT_FOOTER_IMAGE_URLS];
+
   return (
     <footer className="relative overflow-hidden border-t border-[var(--color-border)] bg-[hsl(345_40%_8%)] text-[hsl(30_25%_92%)]">
       <div className="grid grid-cols-3 sm:grid-cols-6">

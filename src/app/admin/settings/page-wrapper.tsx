@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { getAdminSettingsAction, updateAllSettingsAction } from "@/app/admin/actions";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,7 +51,7 @@ export function SettingsPageWrapper({
       // Reload settings to reflect changes
       const updatedSettings = await getAdminSettingsAction();
       setSettings(updatedSettings);
-    } catch (error) {
+    } catch {
       showNotification("error", "Failed to save settings. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -90,6 +91,42 @@ export function SettingsPageWrapper({
                 <div><Label htmlFor="business-instagram">Instagram</Label><Input id="business-instagram" name="instagram" defaultValue={business.instagram} className="mt-1.5" /></div>
                 <div className="sm:col-span-2"><Label htmlFor="business-review">Google Review URL</Label><Input id="business-review" name="google_review_url" type="url" placeholder="https://g.page/r/..." defaultValue={business.google_review_url ?? ""} className="mt-1.5" /></div>
                 <div className="sm:col-span-2"><Label htmlFor="business-address">Address</Label><Textarea id="business-address" name="address" defaultValue={business.address} rows={3} className="mt-1.5" /></div>
+                <div className="sm:col-span-2 border-t border-(--color-border) pt-4">
+                  <p className="text-sm font-semibold text-(--color-foreground)">Brand images</p>
+                  <p className="mt-1 text-xs text-(--color-muted-foreground)">
+                    Update the homepage card fan, admin login image, and footer strip without changing code.
+                  </p>
+                </div>
+                <div className="sm:col-span-2">
+                  <ImageUploadField
+                    id="admin-login-image"
+                    name="admin_login_image_file"
+                    label="Admin login image"
+                    currentUrl={business.admin_login_image_url}
+                  />
+                </div>
+                <div className="sm:col-span-2 grid gap-4 lg:grid-cols-2">
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <ImageUploadField
+                      key={`hero-image-${index}`}
+                      id={`hero-image-${index}`}
+                      name={`hero_image_file_${index}`}
+                      label={`Homepage showcase image ${index + 1}`}
+                      currentUrl={business.hero_image_urls?.[index] ?? null}
+                    />
+                  ))}
+                </div>
+                <div className="sm:col-span-2 grid gap-4 lg:grid-cols-2">
+                  {Array.from({ length: 6 }, (_, index) => (
+                    <ImageUploadField
+                      key={`footer-image-${index}`}
+                      id={`footer-image-${index}`}
+                      name={`footer_image_file_${index}`}
+                      label={`Footer image ${index + 1}`}
+                      currentUrl={business.footer_image_urls?.[index] ?? null}
+                    />
+                  ))}
+                </div>
               </div>
             </section>
 
