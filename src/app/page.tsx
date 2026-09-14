@@ -13,11 +13,30 @@ import { getPublishedTestimonials } from "@/lib/data/testimonials";
 export const revalidate = 300; // Cache for 5 minutes
 
 export default async function HomePage() {
-  const [bridalPackages, testimonials, siteSettings] = await Promise.all([
-    getActivePackages({ serviceSlug: "bridal", limit: 4 }),
+  const [allPackages, testimonials, siteSettings] = await Promise.all([
+    getActivePackages({ limit: 100 }), // Get all packages
     getPublishedTestimonials(),
     getSiteSettings(),
   ]);
+
+  // Get featured package IDs from settings (admin control)
+  const featuredIds = siteSettings.featured_package_ids ?? [];
+  
+  // If admin selected specific packages, use those; otherwise show one per service
+  let bridalPackages: typeof allPackages;
+  if (featuredIds.length > 0) {
+    bridalPackages = allPackages.filter(pkg => featuredIds.includes(pkg.id)).slice(0, 8);
+  } else {
+    // Default: one from each service type
+    const byService = new Map<string | null, typeof allPackages[0]>();
+    allPackages.forEach(pkg => {
+      const service = pkg.services?.[0]?.slug ?? null;
+      if (!byService.has(service)) {
+        byService.set(service, pkg);
+      }
+    });
+    bridalPackages = Array.from(byService.values()).slice(0, 6);
+  }
 
   const formattedTestimonials = testimonials.length > 0
     ? testimonials.map((t) => ({
