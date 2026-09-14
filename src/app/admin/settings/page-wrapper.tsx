@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminNotification } from "@/components/ui/admin-notification";
 import type { SiteSettings, BookingSettings, PaymentSettings, ServiceSettings, CheckoutSettings } from "@/types";
-import { Bell, Building2, Car, CreditCard, Settings } from "lucide-react";
+import { Bell, Building2, Car, CreditCard, ImagePlus, Settings } from "lucide-react";
 
 type ImageRow = {
   id: string;
@@ -89,47 +89,22 @@ export function SettingsPageWrapper({
         </div>
 
         <form id="settings-form" onSubmit={handleSubmit} className="space-y-5" aria-busy={isSubmitting}>
-          <div className="grid gap-5 lg:grid-cols-2">
-            <section className="rounded-(--radius-xl) border border-(--color-border) bg-(--color-card)">
-              <header className="border-b border-(--color-border) bg-(--color-muted)/30 px-5 py-4">
-                <div className="flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-(--color-secondary)" aria-hidden="true" />
-                  <div>
-                    <h2 className="font-[family-name:var(--font-heading)] text-xl text-(--color-foreground)">Business information</h2>
-                    <p className="mt-1 text-xs text-(--color-muted-foreground)">Your business details and contact information.</p>
-                  </div>
-                </div>
-              </header>
-              <div className="grid gap-4 p-5 sm:grid-cols-2">
-                <div className="sm:col-span-2"><Label htmlFor="business-name">Business Name</Label><Input id="business-name" name="business_name" defaultValue={business.business_name} className="mt-1.5" /></div>
-                <div><Label htmlFor="business-email">Email</Label><Input id="business-email" name="email" type="email" defaultValue={business.email} className="mt-1.5" /></div>
-                <div><Label htmlFor="business-phone">Phone</Label><Input id="business-phone" name="phone" defaultValue={business.phone} className="mt-1.5" /></div>
-                <div><Label htmlFor="business-whatsapp">WhatsApp</Label><Input id="business-whatsapp" name="whatsapp" defaultValue={business.whatsapp} className="mt-1.5" /></div>
-                <div><Label htmlFor="business-instagram">Instagram</Label><Input id="business-instagram" name="instagram" defaultValue={business.instagram} className="mt-1.5" /></div>
-                <div className="sm:col-span-2"><Label htmlFor="business-review">Google Review URL</Label><Input id="business-review" name="google_review_url" type="url" placeholder="https://g.page/r/..." defaultValue={business.google_review_url ?? ""} className="mt-1.5" /></div>
-                <div className="sm:col-span-2"><Label htmlFor="business-address">Address</Label><Textarea id="business-address" name="address" defaultValue={business.address} rows={3} className="mt-1.5" /></div>
-                <div className="sm:col-span-2 border-t border-(--color-border) pt-4">
-                  <p className="text-sm font-semibold text-(--color-foreground)">Brand images</p>
-                  <p className="mt-1 text-xs text-(--color-muted-foreground)">
-                    Update the admin login image plus one shared gallery used on both the homepage cards and the footer strip.
-                  </p>
-                </div>
-                <div className="sm:col-span-2">
-                  <ImageUploadField
-                    id="admin-login-image"
-                    name="admin_login_image_file"
-                    label="Admin login image"
-                    currentUrl={business.admin_login_image_url}
-                    clearName="admin_login_image_clear"
-                  />
-                </div>
-                <div className="sm:col-span-2 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-(--color-foreground)">Homepage + footer gallery</p>
-                    <p className="mt-1 text-xs text-(--color-muted-foreground)">
-                      Add, replace, or remove images. The same list is used in both places.
+          <section className="rounded-(--radius-xl) border border-(--color-border) bg-(--color-card)">
+            <header className="border-b border-(--color-border) bg-(--color-muted)/30 px-5 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <ImagePlus className="mt-0.5 h-5 w-5 shrink-0 text-(--color-secondary)" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <h2 className="font-[family-name:var(--font-heading)] text-xl text-(--color-foreground)">Brand images</h2>
+                    <p className="mt-1 text-xs leading-relaxed text-(--color-muted-foreground)">
+                      Keep the homepage card fan and footer strip in sync with one shared gallery. Add, replace, or remove images any time.
                     </p>
                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full border border-(--color-border) bg-(--color-background) px-3 py-1 text-xs text-(--color-muted-foreground)">
+                    {showcaseImages.length} gallery image{showcaseImages.length === 1 ? "" : "s"}
+                  </span>
                   <Button
                     type="button"
                     variant="outline"
@@ -144,8 +119,33 @@ export function SettingsPageWrapper({
                     Add image
                   </Button>
                 </div>
+              </div>
+            </header>
+            <div className="grid gap-5 p-5 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]">
+              <div className="space-y-4">
+                <div className="rounded-(--radius-lg) border border-(--color-border) bg-(--color-muted)/20 p-4">
+                  <p className="text-sm font-semibold text-(--color-foreground)">Admin login image</p>
+                  <p className="mt-1 text-xs leading-relaxed text-(--color-muted-foreground)">
+                    This image appears on the split-screen studio login page only.
+                  </p>
+                  <div className="mt-4">
+                    <ImageUploadField
+                      id="admin-login-image"
+                      name="admin_login_image_file"
+                      label="Studio login image"
+                      currentUrl={business.admin_login_image_url}
+                      clearName="admin_login_image_clear"
+                    />
+                  </div>
+                </div>
+                <div className="rounded-(--radius-lg) border border-dashed border-(--color-border) p-4 text-xs leading-relaxed text-(--color-muted-foreground)">
+                  The shared gallery is used in two places: the homepage showcase cards and the footer strip. Remove all images if you want to hide both sections.
+                </div>
+              </div>
+
+              <div>
                 <input type="hidden" name="hero_image_slots" value={showcaseImages.length} />
-                <div className="sm:col-span-2 grid gap-4 lg:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                   {showcaseImages.map((image, index) => (
                     <div
                       key={image.id}
@@ -179,6 +179,29 @@ export function SettingsPageWrapper({
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <section className="rounded-(--radius-xl) border border-(--color-border) bg-(--color-card)">
+              <header className="border-b border-(--color-border) bg-(--color-muted)/30 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <Building2 className="h-5 w-5 text-(--color-secondary)" aria-hidden="true" />
+                  <div>
+                    <h2 className="font-[family-name:var(--font-heading)] text-xl text-(--color-foreground)">Business information</h2>
+                    <p className="mt-1 text-xs text-(--color-muted-foreground)">Your business details and contact information.</p>
+                  </div>
+                </div>
+              </header>
+              <div className="grid gap-4 p-5 sm:grid-cols-2">
+                <div className="sm:col-span-2"><Label htmlFor="business-name">Business Name</Label><Input id="business-name" name="business_name" defaultValue={business.business_name} className="mt-1.5" /></div>
+                <div><Label htmlFor="business-email">Email</Label><Input id="business-email" name="email" type="email" defaultValue={business.email} className="mt-1.5" /></div>
+                <div><Label htmlFor="business-phone">Phone</Label><Input id="business-phone" name="phone" defaultValue={business.phone} className="mt-1.5" /></div>
+                <div><Label htmlFor="business-whatsapp">WhatsApp</Label><Input id="business-whatsapp" name="whatsapp" defaultValue={business.whatsapp} className="mt-1.5" /></div>
+                <div><Label htmlFor="business-instagram">Instagram</Label><Input id="business-instagram" name="instagram" defaultValue={business.instagram} className="mt-1.5" /></div>
+                <div className="sm:col-span-2"><Label htmlFor="business-review">Google Review URL</Label><Input id="business-review" name="google_review_url" type="url" placeholder="https://g.page/r/..." defaultValue={business.google_review_url ?? ""} className="mt-1.5" /></div>
+                <div className="sm:col-span-2"><Label htmlFor="business-address">Address</Label><Textarea id="business-address" name="address" defaultValue={business.address} rows={3} className="mt-1.5" /></div>
               </div>
             </section>
 
