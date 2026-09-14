@@ -172,7 +172,7 @@ export async function notifyAdminsOfEnquiry(input: {
     package: "enquiry",
     date: new Date().toISOString().slice(0, 10),
     time: "",
-    admin_link: `${(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "")}/admin/enquiries`,
+    admin_link: `${(process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "")}/admin/enquiries`,
   };
   return notifyAdmins({
     templateKey: "contact_enquiry",

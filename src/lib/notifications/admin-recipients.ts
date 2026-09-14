@@ -1,12 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export function adminBookingLink(bookingId: string) {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const base = process.env.APP_URL ?? "http://localhost:3000";
   return `${base.replace(/\/$/, "")}/admin/bookings/${bookingId}`;
 }
 
 export function paymentLink(bookingId: string) {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const base = process.env.APP_URL ?? "http://localhost:3000";
   return `${base.replace(/\/$/, "")}/book/confirmation/${bookingId}`;
 }
 

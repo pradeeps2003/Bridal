@@ -29,24 +29,24 @@ const FAN_POSITIONS = [
 ];
 
 function getResponsiveMultiplier(width: number) {
-  if (width < 480) return 0.28;
-  if (width < 640) return 0.38;
-  if (width < 768) return 0.5;
+  if (width < 480) return 0.35;
+  if (width < 640) return 0.45;
+  if (width < 768) return 0.6;
   if (width < 1024) return 0.75;
   return 1.0;
 }
 
 function getHeightMultiplier(width: number) {
   let idealPx: number;
-  if (width < 480) idealPx = 22 * 16;
-  else if (width < 640) idealPx = 26 * 16;
-  else if (width < 768) idealPx = 28 * 16;
+  if (width < 480) idealPx = 24 * 16;
+  else if (width < 640) idealPx = 28 * 16;
+  else if (width < 768) idealPx = 30 * 16;
   else if (width < 1024) idealPx = 34 * 16;
   else idealPx = 38 * 16;
 
-  const available = window.innerHeight * 0.7;
+  const available = window.innerHeight * 0.65;
   if (available >= idealPx) return 1;
-  return available / idealPx;
+  return Math.max(available / idealPx, 0.85);
 }
 
 function getSlotConfig(totalCards: number, slot: number) {
@@ -74,8 +74,9 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
   const prevVisible = useRef<Set<number>>(new Set());
 
   const totalCards = cards.length;
-  const needsPagination = totalCards > MAX_VISIBLE;
-  const [centerIndex, setCenterIndex] = useState(needsPagination ? HALF : totalCards >> 1);
+  // Enable pagination even with 2 or more cards on mobile
+  const needsPagination = totalCards > 1;
+  const [centerIndex, setCenterIndex] = useState(needsPagination ? (totalCards > MAX_VISIBLE ? HALF : 0) : totalCards >> 1);
 
   const getVisibleMap = useCallback(
     (center: number) => {
@@ -143,6 +144,9 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
 
       if (slot !== undefined) {
         const { x, y, rot, scale, zIndex } = config(slot);
+        const isCenterCard = slot === (needsPagination ? HALF : totalCards >> 1);
+        const blurAmount = isCenterCard ? 0 : Math.min(Math.abs(slot - (needsPagination ? HALF : totalCards >> 1)) * 2, 8);
+        
         const target = {
           x: `${x * multiplier}rem`,
           y: `${y * hMult}rem`,
@@ -150,10 +154,11 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
           scale,
           opacity: 1,
           zIndex,
+          filter: `blur(${blurAmount}px)`,
         };
 
         if (isFirstMount) {
-          gsap.set(card, { x: 0, y: `${12 * hMult}rem`, rotation: 0, scale: 0.5, opacity: 0 });
+          gsap.set(card, { x: 0, y: `${12 * hMult}rem`, rotation: 0, scale: 0.5, opacity: 0, filter: "blur(8px)" });
           gsap.to(card, {
             ...target,
             duration: 1.2,
@@ -169,6 +174,7 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
             rotation: direction === "right" ? 30 : -30,
             scale: 0.5,
             opacity: 0,
+            filter: "blur(8px)",
           });
           gsap.to(card, { ...target, duration: 0.6, ease: "power2.out", onComplete: onCardDone });
         } else {
@@ -214,6 +220,14 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
         let targetRot = base.rot;
         let targetScale = base.scale;
         let delay = 0;
+        
+        // Calculate blur based on distance from center
+        const isCenterCard = slot === centerSlot;
+        const blurAmount = hoveredSlot !== null && slot === hoveredSlot 
+          ? 0 
+          : isCenterCard 
+            ? 0 
+            : Math.min(Math.abs(slot - centerSlot) * 2, 8);
 
         if (hoveredSlot !== null) {
           const distance = Math.abs(slot - hoveredSlot);
@@ -246,6 +260,7 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
           y: `${targetY}rem`,
           rotation: targetRot,
           scale: targetScale,
+          filter: `blur(${blurAmount}px)`,
           duration: 0.5,
           delay,
           ease: "elastic.out(1,.75)",

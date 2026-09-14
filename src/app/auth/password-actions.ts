@@ -14,7 +14,7 @@ export async function requestPasswordResetAction(
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!email) return { error: "Enter the email on your account.", success: false };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  const appUrl = process.env.APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${appUrl}/auth/callback?next=/reset-password`,

@@ -76,7 +76,7 @@ The customer policy must only allow rows where the booking customer has `auth_us
 These remain required for the existing database/auth behavior:
 
 ```env
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key

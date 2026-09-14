@@ -36,7 +36,7 @@ export async function sendReviewRequest(bookingId: string): Promise<Notification
     .maybeSingle();
   const business = setting?.value as { google_review_url?: string | null } | null;
   const googleReviewUrl = business?.google_review_url?.trim() || "";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
   const pkg = booking.packages as { name?: string } | null;
 
   const result = await notifyFromTemplate(

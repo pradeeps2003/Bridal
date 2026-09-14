@@ -6,7 +6,7 @@ export async function GET() {
   await supabase.auth.signOut();
 
   const response = NextResponse.redirect(
-    new URL("/admin/login", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+    new URL("/admin/login", process.env.APP_URL ?? "http://localhost:3000"),
   );
 
   // Clear all sb- cookies explicitly

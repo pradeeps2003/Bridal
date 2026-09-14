@@ -6,8 +6,11 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { CookieBanner } from "@/components/layout/cookie-banner";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Toaster } from "@/components/ui/toast";
+import { getServerEnv } from "@/lib/env";
 import { SEO_DESCRIPTION, SEO_KEYWORDS } from "@/lib/seo/service-area";
 import { getSiteUrl } from "@/lib/seo/site-url";
+
+const { GSC_VERIFICATION } = getServerEnv();
 
 const cormorant = Cormorant({
   subsets: ["latin"],
@@ -35,8 +38,8 @@ export const metadata: Metadata = {
     icon: "/logo.png",
     apple: "/logo.png",
   },
-  verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
-    ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
+  verification: GSC_VERIFICATION
+    ? { google: GSC_VERIFICATION }
     : undefined,
   robots: {
     index: true,

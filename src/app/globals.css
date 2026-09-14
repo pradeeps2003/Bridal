@@ -326,6 +326,7 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .scrollbar-hide::-webkit-scrollbar {
@@ -395,7 +396,8 @@
   }
 
   .fan-layout {
-    height: 22rem;
+    height: 24rem;
+    touch-action: pan-y pinch-zoom;
   }
 
   .fan-card {
@@ -410,15 +412,16 @@
     border-radius: 1.15rem;
     box-shadow: 0 18px 40px hsl(345 55% 12% / 0.22);
     will-change: transform;
+    touch-action: manipulation;
   }
 
   @media (min-width: 480px) {
-    .fan-layout { height: 26rem; }
+    .fan-layout { height: 28rem; }
     .fan-card { width: 12rem; height: 16.8rem; margin-left: -6rem; margin-top: -8.4rem; }
   }
 
   @media (min-width: 640px) {
-    .fan-layout { height: 28rem; }
+    .fan-layout { height: 30rem; }
     .fan-card { width: 13rem; height: 18.2rem; margin-left: -6.5rem; margin-top: -9.1rem; }
   }
 

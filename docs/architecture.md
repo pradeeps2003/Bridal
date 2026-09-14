@@ -90,7 +90,7 @@ See `.env.example` for the full list. Required for production:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server only)
-- `NEXT_PUBLIC_APP_URL`
+- `APP_URL`
 
 Payment and WhatsApp variables are optional until Phases 9–10.
 
