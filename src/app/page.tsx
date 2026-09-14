@@ -27,12 +27,12 @@ export default async function HomePage() {
   if (featuredIds.length > 0) {
     bridalPackages = allPackages.filter(pkg => featuredIds.includes(pkg.id)).slice(0, 8);
   } else {
-    // Default: one from each service type
-    const byService = new Map<string | null, typeof allPackages[0]>();
+    // Default: one from each service type (by service_id since that's what we have)
+    const byService = new Map<string, typeof allPackages[0]>();
     allPackages.forEach(pkg => {
-      const service = pkg.services?.[0]?.slug ?? null;
-      if (!byService.has(service)) {
-        byService.set(service, pkg);
+      const serviceId = pkg.service_id ?? "default";
+      if (!byService.has(serviceId)) {
+        byService.set(serviceId, pkg);
       }
     });
     bridalPackages = Array.from(byService.values()).slice(0, 6);
