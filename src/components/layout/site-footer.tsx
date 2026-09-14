@@ -1,9 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { DEFAULT_FOOTER_IMAGE_URLS } from "@/lib/brand-media";
 import { getSiteSettings } from "@/lib/data/settings";
-import { FooterGallery } from "./footer-gallery";
 
 const DEVELOPER = {
   name: "Pradeep",
@@ -35,7 +35,15 @@ export async function SiteFooter() {
 
   return (
     <footer className="relative overflow-hidden border-t border-[var(--color-border)] bg-[hsl(345_40%_8%)] text-[hsl(30_25%_92%)]">
-      <FooterGallery images={footerLooks} />
+      {footerLooks.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10">
+          {footerLooks.map((src) => (
+            <div key={src} className="relative aspect-[4/5] opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0">
+              <Image src={src} alt="" fill className="object-cover" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 20vw, 10vw" />
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div className="container-wide px-4 py-12 sm:px-6">
         <div className="mb-10 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
