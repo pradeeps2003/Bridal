@@ -58,14 +58,14 @@ export function FooterGallery({ images }: FooterGalleryProps) {
         {displayImages.map((src, index) => (
           <div 
             key={`${src}-${index}`} 
-            className="relative aspect-[4/5] w-[25vw] sm:w-[16.666vw] lg:w-[10vw] flex-shrink-0 opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0"
+            className="relative aspect-[4/5] w-[20vw] sm:w-[12vw] lg:w-[8vw] flex-shrink-0 opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0"
           >
             <Image 
               src={src} 
               alt="" 
               fill 
               className="object-cover" 
-              sizes="(max-width: 640px) 25vw, (max-width: 1024px) 16.666vw, 10vw" 
+              sizes="(max-width: 640px) 20vw, (max-width: 1024px) 12vw, 8vw" 
             />
           </div>
         ))}
