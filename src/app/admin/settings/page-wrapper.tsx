@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminNotification } from "@/components/ui/admin-notification";
-import type { SiteSettings, BookingSettings, PaymentSettings, ServiceSettings, CheckoutSettings } from "@/types";
+import type { SiteSettings, BookingSettings, PaymentSettings, ServiceSettings, CheckoutSettings, Package } from "@/types";
 import { Bell, Building2, Car, CreditCard, Settings, X } from "lucide-react";
 import React from "react";
 
@@ -28,7 +28,7 @@ export function SettingsPageWrapper({
   const router = useRouter();
   const { showNotification, NotificationComponent } = useAdminNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [allPackages, setAllPackages] = useState<any[]>([]);
+  const [allPackages, setAllPackages] = useState<Package[]>([]);
   const [loadingPackages, setLoadingPackages] = useState(true);
   const [settings, setSettings] = useState(initialSettings);
   const [selectedPackages, setSelectedPackages] = useState<string[]>(initialSettings.business.featured_package_ids || []);
