@@ -39,7 +39,7 @@ const iconColors = {
 export function NotificationToast({
   type = "success",
   message,
-  duration = 5000,
+  duration = 3000,
   onClose,
 }: NotificationToastProps) {
   const [isVisible, setIsVisible] = useState(true);

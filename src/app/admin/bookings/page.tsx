@@ -7,8 +7,10 @@ import { getBookings } from "@/lib/data/bookings";
 import { formatCurrency } from "@/lib/utils";
 import type { BookingStatus } from "@/types";
 
+export const revalidate = 30; // Cache for 30 seconds
+
 export default async function AdminBookingsPage() {
-  const bookings = await getBookings({ limit: 100 });
+  const bookings = await getBookings({ limit: 50 });
 
   return (
     <AdminShell>

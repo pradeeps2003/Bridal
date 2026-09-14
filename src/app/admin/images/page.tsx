@@ -4,7 +4,7 @@ import { getSiteSettings } from "@/lib/data/settings";
 import { BrandImagesPageWrapper } from "./page-wrapper";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 1 minute
 
 export default async function AdminImagesPage() {
   const settings = await getSiteSettings();

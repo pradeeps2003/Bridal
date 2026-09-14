@@ -5,7 +5,7 @@ import { getAllServices } from "@/lib/data/services";
 import { ServicesPageWrapper } from "./page-wrapper";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 1 minute
 
 export default async function AdminServicesPage() {
   const services = await getAllServices();

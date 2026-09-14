@@ -5,7 +5,7 @@ import { getAllAddons } from "@/lib/data/addons";
 import { AddonsPageWrapper } from "./page-wrapper";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 1 minute
 
 export default async function AdminAddonsPage() {
   const addons = await getAllAddons();

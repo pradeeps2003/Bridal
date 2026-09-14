@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PackagesPageWrapper } from "./page-wrapper";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 1 minute
 
 async function getAllPackagesWithInclusions() {
   const supabase = await createClient();

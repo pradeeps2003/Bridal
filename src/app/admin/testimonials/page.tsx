@@ -6,7 +6,7 @@ import { TestimonialsPageWrapper } from "./page-wrapper";
 import type { Testimonial } from "@/types";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 1 minute
 
 async function getAllTestimonials(): Promise<Testimonial[]> {
   const supabase = createAdminClient();

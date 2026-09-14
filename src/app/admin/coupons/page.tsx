@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { CouponsPageWrapper } from "./page-wrapper";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Cache for 1 minute
 
 async function getAllCoupons() {
   const supabase = createAdminClient();

@@ -26,6 +26,19 @@ function packageName(booking: Booking) {
 
 export function BookingLedger({ bookings, date }: { bookings: Booking[]; date: string }) {
   const [filter, setFilter] = useState<(typeof filters)[number]["value"]>("ALL");
+  
+  // Memoize filter counts to avoid recalculation
+  const filterCounts = useMemo(() => {
+    const counts: Record<string, number> = { ALL: bookings.length };
+    bookings.forEach((booking) => {
+      if (["REQUESTED", "HELD", "ADMIN_APPROVED", "PAYMENT_PENDING"].includes(booking.status)) {
+        counts.HELD = (counts.HELD || 0) + 1;
+      }
+      counts[booking.status] = (counts[booking.status] || 0) + 1;
+    });
+    return counts;
+  }, [bookings]);
+  
   const visible = useMemo(() => bookings.filter((booking) => {
     if (filter === "ALL") return true;
     if (filter === "HELD") return ["REQUESTED", "HELD", "ADMIN_APPROVED", "PAYMENT_PENDING"].includes(booking.status);
@@ -50,15 +63,16 @@ export function BookingLedger({ bookings, date }: { bookings: Booking[]; date: s
       <div className="flex gap-4 overflow-x-auto border-b border-[var(--color-border)] px-5 relative" role="tablist" aria-label="Booking status filters">
         {filters.map((item) => {
           const isActive = filter === item.value;
+          const count = filterCounts[item.value] || 0;
           return (
             <button key={item.value} type="button" role="tab" aria-selected={isActive} onClick={() => setFilter(item.value)} className={`relative shrink-0 py-3 text-xs transition-colors ${isActive ? "text-[var(--color-foreground)]" : "text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]"}`}>
-              {item.label} <span className="font-numeric">({item.value === "ALL" ? bookings.length : item.value === "HELD" ? bookings.filter((booking) => ["REQUESTED", "HELD", "ADMIN_APPROVED", "PAYMENT_PENDING"].includes(booking.status)).length : bookings.filter((booking) => booking.status === item.value).length})</span>
+              {item.label} <span className="font-numeric">({count})</span>
               {isActive && (
                 <motion.div
                   layoutId="activeTabIndicatorAdminBooking"
                   className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-accent)]"
                   initial={false}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 />
               )}
             </button>
@@ -75,9 +89,9 @@ export function BookingLedger({ bookings, date }: { bookings: Booking[]; date: s
             return (
               <motion.div
                 key={booking.id}
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                transition={{ duration: 0.2, delay: Math.min(index * 0.03, 0.3) }}
               >
                 <Link href={`/admin/bookings/${booking.id}`} className="grid gap-3 px-5 py-4 transition-colors hover:bg-[var(--color-muted)]/40 focus-visible:bg-[var(--color-muted)]/40 lg:grid-cols-[88px_1.3fr_1fr_0.8fr_0.7fr_auto] lg:items-center lg:gap-4">
                   <span className="font-numeric text-2xl">{booking.start_time.slice(0, 5)}</span>

@@ -16,14 +16,16 @@ const cormorant = Cormorant({
   subsets: ["latin"],
   variable: "--font-heading",
   display: "swap",
-  preload: false,
+  weight: ["400", "500", "600", "700"],
+  preload: true,
 });
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-body",
   display: "swap",
-  preload: false,
+  weight: ["300", "400", "500", "600", "700"],
+  preload: true,
 });
 
 export const metadata: Metadata = {
