@@ -54,11 +54,11 @@ export function FooterGallery({ images }: FooterGalleryProps) {
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
     >
-      <div className="flex sm:grid sm:grid-cols-5 lg:grid-cols-10">
+      <div className="flex">
         {displayImages.map((src, index) => (
           <div 
             key={`${src}-${index}`} 
-            className="relative aspect-[4/5] w-[40vw] flex-shrink-0 opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0 sm:w-auto"
+            className="relative aspect-[4/5] w-[40vw] flex-shrink-0 opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0"
           >
             <Image 
               src={src} 
