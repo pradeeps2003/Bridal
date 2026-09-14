@@ -143,6 +143,7 @@ export function BookingStatusActions({
             {pendingStatus === "BALANCE" ? "Saving…" : "Mark balance paid"}
           </Button>
         )}
+        {customerPhone && (
           <Button
             type="button"
             variant="outline"
