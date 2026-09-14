@@ -59,7 +59,6 @@ export function HeroCarousel() {
             key={index}
             type="button"
             onClick={() => setCurrentIndex(index)}
-            aria-label={`Show look ${index + 1}`}
             className={`h-1.5 rounded-full transition-all duration-300 ${
               index === currentIndex
                 ? "w-6 bg-white"
