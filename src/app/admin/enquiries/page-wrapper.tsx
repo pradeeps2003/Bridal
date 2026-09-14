@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAdminNotification } from "@/components/ui/admin-notification";
 import { markEnquiryAsReadAction } from "../actions";
-import { Check, Clock, Mail, MessageSquare, Phone, X } from "lucide-react";
+import { Check, Clock, Mail, MessageSquare, Phone } from "lucide-react";
 
 interface Enquiry {
   id: string;

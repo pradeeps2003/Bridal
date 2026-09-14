@@ -1,9 +1,8 @@
 import { PageHero, PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { PackageCardSlider } from "@/components/ui/package-card-slider";
-import { LazyLoad } from "@/components/ui/lazy-load";
 import { GrainOverlay } from "@/components/ui/grain-overlay";
-import { ScrollAnimate, StaggerContainer } from "@/components/ui/scroll-animate";
+import { ScrollAnimate } from "@/components/ui/scroll-animate";
 import { getActivePackages } from "@/lib/data/packages";
 import { getActiveServices } from "@/lib/data/services";
 import { getPackageSalePrice } from "@/lib/pricing/calculate";

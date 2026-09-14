@@ -1,16 +1,13 @@
 import Link from "next/link";
 
 import { AdminShell } from "@/components/admin/admin-shell";
-import { StatusBadge } from "@/components/booking/payment-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { blockDate, unblockDate } from "@/app/admin/actions";
 import { getCalendarBookings } from "@/lib/data/bookings";
 import { createClient } from "@/lib/supabase/server";
-import type { BookingStatus } from "@/types";
 import { ChevronLeft, ChevronRight, Lock, Trash2 } from "lucide-react";
 
 interface PageProps {
