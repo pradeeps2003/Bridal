@@ -2,6 +2,8 @@ import { PageHero, PageShell } from "@/components/layout/page-shell";
 import { ContactForm } from "@/components/sections/contact-form";
 import { ScrollAnimate } from "@/components/ui/scroll-animate";
 
+export const revalidate = 300; // Cache for 5 minutes
+
 export const metadata = {
   title: "Contact",
   description:

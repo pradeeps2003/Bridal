@@ -10,7 +10,7 @@ export async function GET() {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120", // Cache for 60s on server, 120s client
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=300", // Cache for 5 min on server and client
       },
     });
   } catch (error) {

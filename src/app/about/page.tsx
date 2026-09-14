@@ -7,6 +7,8 @@ import { ScrollAnimate, StaggerContainer } from "@/components/ui/scroll-animate"
 import { getAboutSettings } from "@/lib/data/settings";
 import Link from "next/link";
 
+export const revalidate = 300; // Cache for 5 minutes
+
 export const metadata = {
   title: "About Rubi",
   description:

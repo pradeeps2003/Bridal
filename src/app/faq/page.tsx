@@ -4,6 +4,8 @@ import { FAQAccordion } from "@/components/ui/faq-accordion";
 import { ScrollAnimate } from "@/components/ui/scroll-animate";
 import Link from "next/link";
 
+export const revalidate = 300; // Cache for 5 minutes
+
 export const metadata = {
   title: "FAQ",
   description:
