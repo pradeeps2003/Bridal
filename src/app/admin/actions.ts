@@ -334,6 +334,7 @@ async function saveAddonRow(
   let { error } = await query;
 
   if (isMissingDbColumn(error, "pricing_type")) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { pricing_type: _pricingType, ...withoutPricing } = row;
     const fallback = id
       ? supabase.from("addons").update(withoutPricing).eq("id", id)
