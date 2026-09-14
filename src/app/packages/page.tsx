@@ -24,7 +24,7 @@ interface PageProps {
   searchParams: Promise<{ service?: string }>;
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes
 
 export default async function PackagesPage({ searchParams }: PageProps) {
   const params = await searchParams;
@@ -32,7 +32,7 @@ export default async function PackagesPage({ searchParams }: PageProps) {
 
   const [services, allPackages] = await Promise.all([
     getActiveServices(),
-    getActivePackages(),
+    getActivePackages({ limit: 100 }), // Reduced limit for faster load
   ]);
 
   const selectedService = services.find((s) => s.slug === activeServiceSlug);
