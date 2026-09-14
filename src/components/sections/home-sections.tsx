@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import SocialCards from "@/components/ui/card-fan-carousel";
 import { packagesToServices, ServiceCarousel } from "@/components/ui/services-card";
 import { ScrollAnimate } from "@/components/ui/scroll-animate";
+import { HeroBookButton } from "./hero-book-button";
 import type { Package } from "@/types";
 
 const MARQUEE = ["HD makeup", "Saree draping", "Jewellery setting", "Home service", "Reception glam", "Engagement looks"];
@@ -68,9 +69,7 @@ export function HeroSection({
           transition={{ delay: 0.24 }}
           className="mt-6 flex w-full flex-col justify-center gap-3 px-2 sm:w-auto sm:flex-row sm:flex-wrap sm:px-0"
         >
-          <Button size="lg" variant="modern" asChild className="h-12 w-full rounded-full px-7 sm:w-auto">
-            <Link href="/book">Book your date</Link>
-          </Button>
+          <HeroBookButton />
           <Button size="lg" variant="outline" asChild className="h-12 w-full rounded-full px-7 sm:w-auto">
             <Link href="/packages">See signature looks</Link>
           </Button>
