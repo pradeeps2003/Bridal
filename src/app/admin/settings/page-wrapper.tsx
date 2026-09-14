@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAdminNotification } from "@/components/ui/admin-notification";
 import type { SiteSettings, BookingSettings, PaymentSettings, ServiceSettings, CheckoutSettings } from "@/types";
 import { Bell, Building2, Car, CreditCard, Settings, X } from "lucide-react";
+import React from "react";
 
 export function SettingsPageWrapper({
   initialSettings,
@@ -27,7 +28,26 @@ export function SettingsPageWrapper({
   const router = useRouter();
   const { showNotification, NotificationComponent } = useAdminNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allPackages, setAllPackages] = useState<any[]>([]);
+  const [loadingPackages, setLoadingPackages] = useState(true);
   const [settings, setSettings] = useState(initialSettings);
+  const [selectedPackages, setSelectedPackages] = useState<string[]>(initialSettings.business.featured_package_ids || []);
+
+  // Fetch all packages for selection
+  React.useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const res = await fetch("/api/packages");
+        const data = await res.json();
+        setAllPackages(data || []);
+      } catch (error) {
+        console.error("Failed to fetch packages:", error);
+      } finally {
+        setLoadingPackages(false);
+      }
+    };
+    fetchPackages();
+  }, []);
 
   const { business, booking, payment, service, checkout } = settings;
 
