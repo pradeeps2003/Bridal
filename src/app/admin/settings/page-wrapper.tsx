@@ -33,15 +33,18 @@ export function SettingsPageWrapper({
   const [settings, setSettings] = useState(initialSettings);
   const [selectedPackages, setSelectedPackages] = useState<string[]>(initialSettings.business.featured_package_ids || []);
 
-  // Fetch all packages for selection
+  // Fetch all packages for selection (cached for 60s)
   React.useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const res = await fetch("/api/packages");
+        const res = await fetch("/api/packages", {
+          next: { revalidate: 60 } // Cache for 60 seconds
+        });
         const data = await res.json();
         setAllPackages(data || []);
       } catch (error) {
         console.error("Failed to fetch packages:", error);
+        setAllPackages([]);
       } finally {
         setLoadingPackages(false);
       }
