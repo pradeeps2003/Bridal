@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getAdminSettingsAction, updateAllSettingsAction } from "@/app/admin/actions";
 import { ImageUploadField } from "@/components/admin/image-upload-field";
@@ -13,6 +13,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAdminNotification } from "@/components/ui/admin-notification";
 import type { SiteSettings, BookingSettings, PaymentSettings, ServiceSettings, CheckoutSettings } from "@/types";
 import { Bell, Building2, Car, CreditCard, Settings } from "lucide-react";
+
+type ImageRow = {
+  id: string;
+  currentUrl: string | null;
+};
+
+function createImageRows(urls: string[] | undefined) {
+  return (urls?.length ? urls : []).map((url) => ({
+    id: crypto.randomUUID(),
+    currentUrl: url,
+  }));
+}
 
 export function SettingsPageWrapper({
   initialSettings,
@@ -29,10 +41,15 @@ export function SettingsPageWrapper({
   const { showNotification, NotificationComponent } = useAdminNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [settings, setSettings] = useState(initialSettings);
+  const [showcaseImages, setShowcaseImages] = useState<ImageRow[]>(
+    () => createImageRows(initialSettings.business.hero_image_urls),
+  );
 
   const { business, booking, payment, service, checkout } = settings;
 
-  // No useEffect necessary since settings come as props and are hydrated
+  useEffect(() => {
+    setShowcaseImages(createImageRows(settings.business.hero_image_urls));
+  }, [settings.business.hero_image_urls]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -94,7 +111,7 @@ export function SettingsPageWrapper({
                 <div className="sm:col-span-2 border-t border-(--color-border) pt-4">
                   <p className="text-sm font-semibold text-(--color-foreground)">Brand images</p>
                   <p className="mt-1 text-xs text-(--color-muted-foreground)">
-                    Update the homepage card fan, admin login image, and footer strip without changing code.
+                    Update the admin login image plus one shared gallery used on both the homepage cards and the footer strip.
                   </p>
                 </div>
                 <div className="sm:col-span-2">
@@ -103,28 +120,63 @@ export function SettingsPageWrapper({
                     name="admin_login_image_file"
                     label="Admin login image"
                     currentUrl={business.admin_login_image_url}
+                    clearName="admin_login_image_clear"
                   />
                 </div>
-                <div className="sm:col-span-2 grid gap-4 lg:grid-cols-2">
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <ImageUploadField
-                      key={`hero-image-${index}`}
-                      id={`hero-image-${index}`}
-                      name={`hero_image_file_${index}`}
-                      label={`Homepage showcase image ${index + 1}`}
-                      currentUrl={business.hero_image_urls?.[index] ?? null}
-                    />
-                  ))}
+                <div className="sm:col-span-2 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-(--color-foreground)">Homepage + footer gallery</p>
+                    <p className="mt-1 text-xs text-(--color-muted-foreground)">
+                      Add, replace, or remove images. The same list is used in both places.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setShowcaseImages((current) => [
+                        ...current,
+                        { id: crypto.randomUUID(), currentUrl: null },
+                      ])
+                    }
+                  >
+                    Add image
+                  </Button>
                 </div>
+                <input type="hidden" name="hero_image_slots" value={showcaseImages.length} />
                 <div className="sm:col-span-2 grid gap-4 lg:grid-cols-2">
-                  {Array.from({ length: 6 }, (_, index) => (
-                    <ImageUploadField
-                      key={`footer-image-${index}`}
-                      id={`footer-image-${index}`}
-                      name={`footer_image_file_${index}`}
-                      label={`Footer image ${index + 1}`}
-                      currentUrl={business.footer_image_urls?.[index] ?? null}
-                    />
+                  {showcaseImages.map((image, index) => (
+                    <div
+                      key={image.id}
+                      className="rounded-(--radius-lg) border border-(--color-border) p-3"
+                    >
+                      <input
+                        type="hidden"
+                        name={`hero_image_current_${index}`}
+                        value={image.currentUrl ?? ""}
+                      />
+                      <ImageUploadField
+                        id={`hero-image-${image.id}`}
+                        name={`hero_image_file_${index}`}
+                        label={`Gallery image ${index + 1}`}
+                        currentUrl={image.currentUrl}
+                      />
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setShowcaseImages((current) =>
+                              current.filter((item) => item.id !== image.id),
+                            )
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

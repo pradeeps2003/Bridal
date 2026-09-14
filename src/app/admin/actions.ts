@@ -47,7 +47,11 @@ async function resolveSettingsImage(
   formData: FormData,
   fieldName: string,
   existingUrl: string | null | undefined,
+  clearFieldName?: string,
 ) {
+  if (clearFieldName && formData.get(clearFieldName) === "true") {
+    return null;
+  }
   const file = formData.get(fieldName);
   return isUploadFile(file)
     ? (await uploadAdminImage(file, "branding")).publicUrl
@@ -56,14 +60,17 @@ async function resolveSettingsImage(
 
 async function resolveSettingsImageList(
   formData: FormData,
-  prefix: string,
-  existingUrls: string[] | undefined,
+  filePrefix: string,
+  currentPrefix: string,
   slots: number,
 ) {
-  const current = existingUrls?.slice(0, slots) ?? [];
   const uploads = await Promise.all(
     Array.from({ length: slots }, (_, index) =>
-      resolveSettingsImage(formData, `${prefix}${index}`, current[index] ?? null),
+      resolveSettingsImage(
+        formData,
+        `${filePrefix}${index}`,
+        String(formData.get(`${currentPrefix}${index}`) ?? "").trim() || null,
+      ),
     ),
   );
   return uploads.filter((url): url is string => typeof url === "string" && url.trim().length > 0);
@@ -482,6 +489,13 @@ export async function getAdminSettingsAction() {
 export async function updateBusinessSettings(formData: FormData) {
   const { admin } = await requireAdmin("settings.manage");
   const existing = await getSiteSettings();
+  const showcaseSlots = Number(formData.get("hero_image_slots") || 0);
+  const showcaseImageUrls = await resolveSettingsImageList(
+    formData,
+    "hero_image_file_",
+    "hero_image_current_",
+    showcaseSlots,
+  );
 
   await updateSiteSetting(
     "business",
@@ -497,19 +511,10 @@ export async function updateBusinessSettings(formData: FormData) {
         formData,
         "admin_login_image_file",
         existing.admin_login_image_url,
+        "admin_login_image_clear",
       ),
-      hero_image_urls: await resolveSettingsImageList(
-        formData,
-        "hero_image_file_",
-        existing.hero_image_urls,
-        5,
-      ),
-      footer_image_urls: await resolveSettingsImageList(
-        formData,
-        "footer_image_file_",
-        existing.footer_image_urls,
-        6,
-      ),
+      hero_image_urls: showcaseImageUrls,
+      footer_image_urls: showcaseImageUrls,
     },
     admin.id,
   );
@@ -568,22 +573,18 @@ export async function updateAllSettingsAction(formData: FormData) {
   const { admin } = await requireAdmin("settings.manage");
   const existing = await getSiteSettings();
   const couponsEnabled = formData.get("coupons_enabled") === "true";
+  const showcaseSlots = Number(formData.get("hero_image_slots") || 0);
   const adminLoginImageUrl = await resolveSettingsImage(
     formData,
     "admin_login_image_file",
     existing.admin_login_image_url,
+    "admin_login_image_clear",
   );
-  const heroImageUrls = await resolveSettingsImageList(
+  const showcaseImageUrls = await resolveSettingsImageList(
     formData,
     "hero_image_file_",
-    existing.hero_image_urls,
-    5,
-  );
-  const footerImageUrls = await resolveSettingsImageList(
-    formData,
-    "footer_image_file_",
-    existing.footer_image_urls,
-    6,
+    "hero_image_current_",
+    showcaseSlots,
   );
 
   // Update all settings in parallel
@@ -599,8 +600,8 @@ export async function updateAllSettingsAction(formData: FormData) {
         address: formData.get("address"),
         google_review_url: formData.get("google_review_url"),
         admin_login_image_url: adminLoginImageUrl,
-        hero_image_urls: heroImageUrls,
-        footer_image_urls: footerImageUrls,
+        hero_image_urls: showcaseImageUrls,
+        footer_image_urls: showcaseImageUrls,
       },
       admin.id,
     ),

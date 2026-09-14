@@ -91,10 +91,11 @@ async function fetchSetting<T>(key: string, fallback: T): Promise<T> {
 }
 
 function normalizeImageUrls(value: unknown, fallback: readonly string[]) {
-  const urls = Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
-    : [];
-  return urls.length ? urls : [...fallback];
+  if (!Array.isArray(value)) {
+    return [...fallback];
+  }
+
+  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
 }
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -111,6 +112,15 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     footer_image_urls: DEFAULT_BUSINESS.footer_image_urls,
   });
 
+  const heroImageUrls = normalizeImageUrls(
+    (business as { hero_image_urls?: unknown }).hero_image_urls,
+    DEFAULT_HERO_IMAGE_URLS,
+  );
+  const footerImageUrls = normalizeImageUrls(
+    (business as { footer_image_urls?: unknown }).footer_image_urls,
+    heroImageUrls,
+  );
+
   return {
     business_name: (business as { name?: string }).name ?? DEFAULT_BUSINESS.business_name,
     phone: (business as { phone?: string }).phone || DEFAULT_BUSINESS.phone,
@@ -123,14 +133,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       typeof (business as { admin_login_image_url?: unknown }).admin_login_image_url === "string"
         ? ((business as { admin_login_image_url?: string }).admin_login_image_url ?? DEFAULT_BUSINESS.admin_login_image_url)
         : DEFAULT_BUSINESS.admin_login_image_url,
-    hero_image_urls: normalizeImageUrls(
-      (business as { hero_image_urls?: unknown }).hero_image_urls,
-      DEFAULT_HERO_IMAGE_URLS,
-    ),
-    footer_image_urls: normalizeImageUrls(
-      (business as { footer_image_urls?: unknown }).footer_image_urls,
-      DEFAULT_FOOTER_IMAGE_URLS,
-    ),
+    hero_image_urls: heroImageUrls,
+    footer_image_urls: footerImageUrls,
   };
 }
 

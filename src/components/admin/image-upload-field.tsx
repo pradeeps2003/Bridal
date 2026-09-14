@@ -12,6 +12,8 @@ interface ImageUploadFieldProps {
   label?: string;
   currentUrl?: string | null;
   required?: boolean;
+  clearName?: string;
+  clearLabel?: string;
 }
 
 function formatBytes(bytes: number) {
@@ -25,6 +27,8 @@ export function ImageUploadField({
   label = "Image file",
   currentUrl,
   required = false,
+  clearName,
+  clearLabel = "Remove current image",
 }: ImageUploadFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -32,8 +36,14 @@ export function ImageUploadField({
   const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [originalSize, setOriginalSize] = useState<number | null>(null);
+  const [shouldClear, setShouldClear] = useState(false);
 
   useEffect(() => {
+    if (shouldClear) {
+      setPreviewUrl("");
+      return;
+    }
+
     if (!file) {
       setPreviewUrl(currentUrl ?? "");
       return;
@@ -42,7 +52,7 @@ export function ImageUploadField({
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
-  }, [file, currentUrl]);
+  }, [file, currentUrl, shouldClear]);
 
   return (
     <div className="space-y-2">
@@ -57,6 +67,28 @@ export function ImageUploadField({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={previewUrl} alt="Selected image preview" className="aspect-[3/2] max-h-48 w-full object-cover" />
         </div>
+      ) : null}
+      {clearName && currentUrl ? (
+        <label className="flex items-center gap-2 text-xs text-(--color-muted-foreground)">
+          <input
+            type="checkbox"
+            name={clearName}
+            value="true"
+            checked={shouldClear}
+            onChange={(event) => {
+              const next = event.target.checked;
+              setShouldClear(next);
+              if (next) {
+                setFile(null);
+                setOriginalSize(null);
+                setError(null);
+                if (inputRef.current) inputRef.current.value = "";
+              }
+            }}
+            className="accent-(--color-accent)"
+          />
+          {clearLabel}
+        </label>
       ) : null}
       <Input
         ref={inputRef}
@@ -75,6 +107,7 @@ export function ImageUploadField({
             return;
           }
           setError(null);
+          setShouldClear(false);
           setOriginalSize(chosen.size);
           setCompressing(true);
           try {

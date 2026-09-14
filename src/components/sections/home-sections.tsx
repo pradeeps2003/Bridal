@@ -77,7 +77,7 @@ export function HeroSection({
         </motion.div>
       </div>
 
-      <SocialCards cards={fanCards} />
+      {fanCards.length > 0 ? <SocialCards cards={fanCards} /> : null}
 
       <div className="relative z-10 overflow-hidden border-t border-[var(--color-border)] py-3">
         <div className="flex w-max animate-[marquee-x_28s_linear_infinite] gap-10 pr-10 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">

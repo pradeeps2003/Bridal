@@ -31,19 +31,19 @@ const footerLinks = {
 
 export async function SiteFooter() {
   const settings = await getSiteSettings();
-  const footerLooks = settings.footer_image_urls?.length
-    ? settings.footer_image_urls
-    : [...DEFAULT_FOOTER_IMAGE_URLS];
+  const footerLooks = settings.hero_image_urls ?? [...DEFAULT_FOOTER_IMAGE_URLS];
 
   return (
     <footer className="relative overflow-hidden border-t border-[var(--color-border)] bg-[hsl(345_40%_8%)] text-[hsl(30_25%_92%)]">
-      <div className="grid grid-cols-3 sm:grid-cols-6">
-        {footerLooks.map((src) => (
-          <div key={src} className="relative aspect-[4/5] opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0">
-            <Image src={src} alt="" fill className="object-cover" sizes="16vw" />
-          </div>
-        ))}
-      </div>
+      {footerLooks.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10">
+          {footerLooks.map((src) => (
+            <div key={src} className="relative aspect-[4/5] opacity-70 grayscale transition duration-500 hover:opacity-100 hover:grayscale-0">
+              <Image src={src} alt="" fill className="object-cover" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 20vw, 10vw" />
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       <div className="container-wide px-4 py-12 sm:px-6">
         <div className="mb-10 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
