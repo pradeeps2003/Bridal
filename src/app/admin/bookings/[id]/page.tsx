@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/booking/payment-button";
 import { BookingStatusActions } from "@/components/admin/booking-status-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { getBookingById } from "@/lib/data/bookings";
-import { getBookingPayments } from "@/lib/payments/confirm";
+import { getBookingPayments, remainingBalance } from "@/lib/payments/confirm";
 import { formatCurrency } from "@/lib/utils";
 import type { BookingStatus } from "@/types";
 
@@ -30,12 +30,14 @@ export default async function AdminBookingDetailPage({ params }: PageProps) {
   const pkg = booking.packages as { name: string; pricing_type: string } | undefined;
   const status = booking.status as BookingStatus;
   const pendingUpi = payments.find((payment) => payment.gateway === "upi" && payment.status === "PENDING");
+  const dueBalance = remainingBalance(Number(booking.total), payments);
 
   const actions: { label: string; status: BookingStatus; variant?: "accent" | "outline" }[] = [];
 
   if (["REQUESTED", "HELD"].includes(status)) {
     actions.push({ label: "Approve", status: "ADMIN_APPROVED", variant: "accent" });
     actions.push({ label: "Reject", status: "REJECTED", variant: "outline" });
+    actions.push({ label: "Cancel", status: "CANCELLED", variant: "outline" });
   }
   if (["ADMIN_APPROVED", "PAYMENT_PENDING"].includes(status)) {
     actions.push({
@@ -97,6 +99,10 @@ export default async function AdminBookingDetailPage({ params }: PageProps) {
                 <span className="text-[var(--color-muted-foreground)]">Advance</span>
                 <span className="font-medium">{formatCurrency(Number(booking.advance))}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-[var(--color-muted-foreground)]">Balance due</span>
+                <span className="font-medium">{formatCurrency(dueBalance)}</span>
+              </div>
             </CardContent>
           </Card>
 
@@ -124,7 +130,13 @@ export default async function AdminBookingDetailPage({ params }: PageProps) {
                 actions={actions}
                 customerPhone={customer?.phone}
                 customerName={customer?.full_name}
+                remainingBalance={["CONFIRMED", "COMPLETED"].includes(status) ? dueBalance : 0}
               />
+              {dueBalance > 0 && ["CONFIRMED", "COMPLETED"].includes(status) ? (
+                <p className="text-xs text-[var(--color-muted-foreground)]">
+                  Mark balance paid after you collect {formatCurrency(dueBalance)} on the event day. If you skip it, this amount is added to revenue automatically 7 days after the event.
+                </p>
+              ) : null}
               {payments.length > 0 && (
                 <div className="space-y-2 text-sm">
                   <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-muted-foreground)]">Payments</p>
@@ -142,6 +154,15 @@ export default async function AdminBookingDetailPage({ params }: PageProps) {
                   <p className="mt-1 text-sm sm:text-base">{booking.notes}</p>
                 </div>
               )}
+              {booking.admin_notes && (
+                <div>
+                  <p className="text-xs sm:text-sm font-medium uppercase tracking-wider text-[var(--color-muted-foreground)]">Admin notes</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm sm:text-base">{booking.admin_notes}</p>
+                </div>
+              )}
+              <p className="text-xs leading-relaxed text-[var(--color-muted-foreground)]">
+                Refunds are never automatic. Under 7 days to the event, policy is no advance return unless you choose to send it back on UPI.
+              </p>
               <Link
                 href={`/book/confirmation/${id}`}
                 className="inline-block text-sm sm:text-base text-[var(--color-accent)] underline-offset-4 hover:underline"

@@ -17,15 +17,22 @@ function durationForPackage(packageId: string) {
   return (pkg?.duration_hours ?? 2) * 60;
 }
 
-export async function getSlotsForDate(date: string, packageId: string): Promise<TimeSlot[]> {
+export async function getSlotsForDate(
+  date: string,
+  packageId: string,
+  requestedLocation: "home" | "studio" = "home",
+): Promise<TimeSlot[]> {
   const bookingSettings = await getBookingSettings();
   let durationMinutes = durationForPackage(packageId);
+  const travelBufferMinutes = (bookingSettings.travel_buffer_hours ?? 0) * 60;
 
   const fallback = () =>
     getAvailableSlots({
       date,
       durationMinutes,
       bufferMinutes: bookingSettings.buffer_hours * 60,
+      travelBufferMinutes,
+      requestedLocation,
       minAdvanceHours: bookingSettings.min_advance_hours,
       rules: DEFAULT_RULES,
       blockedDates: [],
@@ -56,7 +63,7 @@ export async function getSlotsForDate(date: string, packageId: string): Promise<
     const [blockedDatesRes, blockedSlotsRes, bookingsRes] = await Promise.all([
       supabase.from("blocked_dates").select("blocked_date"),
       supabase.from("blocked_slots").select("blocked_date, start_time, end_time"),
-      supabase.from("bookings").select("event_date, start_time, end_time, status").eq("event_date", date),
+      supabase.from("bookings").select("event_date, start_time, end_time, status, location_type").eq("event_date", date),
     ]);
 
     const rules = DEFAULT_RULES;
@@ -65,6 +72,8 @@ export async function getSlotsForDate(date: string, packageId: string): Promise<
       date,
       durationMinutes,
       bufferMinutes: bookingSettings.buffer_hours * 60,
+      travelBufferMinutes,
+      requestedLocation,
       minAdvanceHours: bookingSettings.min_advance_hours,
       rules,
       blockedDates: (blockedDatesRes.data ?? []).map((d) => d.blocked_date as string),
@@ -81,8 +90,9 @@ export async function isSlotAvailable(
   date: string,
   startTime: string,
   packageId: string,
+  requestedLocation: "home" | "studio" = "home",
 ): Promise<boolean> {
   const normalized = startTime.length === 5 ? `${startTime}:00` : startTime;
-  const slots = await getSlotsForDate(date, packageId);
+  const slots = await getSlotsForDate(date, packageId, requestedLocation);
   return slots.some((s) => s.start_time === normalized && s.available);
 }

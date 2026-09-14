@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AdminNav, type AdminMenuItem } from "@/components/admin/admin-nav";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const MENU_ID = "admin-mobile-menu";
 const CONTENT_SELECTOR = "[data-admin-content]";
@@ -112,8 +113,10 @@ export function MobileAdminMenu({ items, account }: MobileAdminMenuProps) {
           </span>
         </Link>
 
-        <Button
-          ref={triggerRef}
+        <div className="flex shrink-0 items-center gap-1">
+          <ThemeToggle />
+          <Button
+            ref={triggerRef}
           type="button"
           variant="ghost"
           size="icon"
@@ -121,10 +124,11 @@ export function MobileAdminMenu({ items, account }: MobileAdminMenuProps) {
           aria-label="Open admin menu"
           aria-expanded={isOpen}
           aria-controls={MENU_ID}
-          onClick={openMenu}
-        >
-          <Menu className="h-5 w-5" aria-hidden="true" />
-        </Button>
+            onClick={openMenu}
+          >
+            <Menu className="h-5 w-5" aria-hidden="true" />
+          </Button>
+        </div>
       </header>
 
       <AnimatePresence initial={false}>

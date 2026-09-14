@@ -3,17 +3,28 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Package, PricingType } from "@/types";
 
+const PACKAGE_SELECT =
+  "id, service_id, name, slug, description, image_url, price, pricing_type, duration_hours, is_active, display_order, package_items(label, display_order), services(slug)";
+const PACKAGE_SELECT_WITH_TYPE =
+  "id, service_id, name, slug, description, image_url, price, pricing_type, duration_hours, is_active, display_order, package_type, package_items(label, display_order), services(slug)";
+
+function isMissingPackageType(error: { message?: string } | null) {
+  return Boolean(error?.message?.includes("package_type"));
+}
+
 interface DbPackageRow {
   id: string;
   service_id: string;
   name: string;
   slug: string;
   description: string | null;
+  image_url?: string | null;
   price: number | string;
   pricing_type: PricingType;
   duration_hours: number;
   is_active: boolean;
   display_order: number;
+  package_type?: Package["package_type"];
   package_items?: { label: string; display_order: number }[];
   services?: { slug: string } | { slug: string }[];
 }
@@ -29,11 +40,13 @@ function mapPackage(row: DbPackageRow): Package {
     name: row.name,
     slug: row.slug,
     description: row.description,
+    image_url: row.image_url ?? null,
     price: Number(row.price),
     pricing_type: row.pricing_type,
     duration_hours: row.duration_hours,
     is_active: row.is_active,
     display_order: row.display_order,
+    package_type: row.package_type,
     inclusions: inclusions?.length ? inclusions : undefined,
   };
 }
@@ -59,9 +72,7 @@ export async function getActivePackages(options?: {
     const supabase = await createClient();
     let query = supabase
       .from("packages")
-      .select(
-        "id, service_id, name, slug, description, price, pricing_type, duration_hours, is_active, display_order, package_items(label, display_order), services(slug)",
-      )
+      .select(PACKAGE_SELECT_WITH_TYPE)
       .eq("is_active", true)
       .order("display_order", { ascending: true });
 
@@ -73,10 +84,27 @@ export async function getActivePackages(options?: {
       query = query.limit(options.limit);
     }
 
-    const { data, error } = await query;
+    let { data, error } = await query;
 
-    if (error || !data?.length) {
-      console.warn("[packages] Supabase fetch failed, using seed:", error?.message);
+    if (isMissingPackageType(error)) {
+      let fallbackQuery = supabase
+        .from("packages")
+        .select(PACKAGE_SELECT)
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+      if (options?.serviceSlug) {
+        fallbackQuery = fallbackQuery.eq("services.slug", options.serviceSlug);
+      }
+      if (options?.limit) {
+        fallbackQuery = fallbackQuery.limit(options.limit);
+      }
+      const retry = await fallbackQuery;
+      data = retry.data;
+      error = retry.error;
+    }
+
+    if (error) {
+      console.warn("[packages] Supabase fetch failed, using seed:", error.message);
       let fallback = SEED_PACKAGES.filter((p) => p.is_active);
       if (options?.serviceSlug) {
         fallback = fallback.filter((p) => p.slug.includes(options.serviceSlug!));
@@ -104,7 +132,7 @@ export async function getAllPackages(): Promise<Package[]> {
     const { data, error } = await supabase
       .from("packages")
       .select(
-        "id, service_id, name, slug, description, price, pricing_type, duration_hours, is_active, display_order, package_items(label, display_order)",
+        "id, service_id, name, slug, description, image_url, price, pricing_type, duration_hours, is_active, display_order, package_items(label, display_order)",
       )
       .order("display_order", { ascending: true });
 
@@ -129,7 +157,7 @@ export async function getPackageBySlug(slug: string): Promise<Package | null> {
     const { data, error } = await supabase
       .from("packages")
       .select(
-        "id, service_id, name, slug, description, price, pricing_type, duration_hours, is_active, display_order, package_items(label, display_order)",
+        "id, service_id, name, slug, description, image_url, price, pricing_type, duration_hours, is_active, display_order, package_items(label, display_order)",
       )
       .eq("slug", slug)
       .eq("is_active", true)

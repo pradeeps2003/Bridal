@@ -4,6 +4,9 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { getAllPortfolioItems } from "@/lib/data/portfolio";
 import { PortfolioPageWrapper } from "./page-wrapper";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminPortfolioPage() {
   const items = await getAllPortfolioItems();
 

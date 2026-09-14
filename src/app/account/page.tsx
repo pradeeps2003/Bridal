@@ -33,9 +33,18 @@ export default async function AccountPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-screen bg-[var(--color-background)] pt-24 pb-16 lg:pt-32">
-        <div className="container-narrow px-6">
-          <CustomerPortal email={user.email ?? ""} upcomingBooking={upcoming} history={history} />
+      <main className="min-h-screen bg-[var(--color-background)] pb-20 pt-24 lg:pt-32">
+        <div className="container-wide px-4 sm:px-6">
+          <CustomerPortal
+            email={user.email ?? ""}
+            displayName={
+              (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+              (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
+              ""
+            }
+            upcomingBooking={upcoming}
+            history={history}
+          />
         </div>
       </main>
       <SiteFooter />

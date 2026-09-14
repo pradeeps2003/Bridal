@@ -6,12 +6,13 @@ import { TestimonialsPageWrapper } from "./page-wrapper";
 import type { Testimonial } from "@/types";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function getAllTestimonials(): Promise<Testimonial[]> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("testimonials")
-    .select("id, full_name, quote, event_type, is_published, created_at, booking_id")
+    .select("id, full_name, quote, event_type, rating, is_published, created_at, booking_id")
     .order("created_at", { ascending: false });
   return (data ?? []) as Testimonial[];
 }

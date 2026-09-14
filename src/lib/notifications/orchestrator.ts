@@ -69,6 +69,7 @@ async function notifyAdmins(input: {
   templateKey: string;
   subject: string;
   vars: Record<string, string>;
+  alwaysEmail?: boolean;
 }): Promise<NotificationResult[]> {
   const results: NotificationResult[] = [];
   const { adminPhone, adminEmails } = await resolveAdminRecipients();
@@ -84,7 +85,7 @@ async function notifyAdmins(input: {
     results.push(whatsappResult);
   }
 
-  if (!whatsappResult?.success) {
+  if (input.alwaysEmail || !whatsappResult?.success) {
     const message = await renderMessage(input.templateKey, input.vars);
     const emailResults = await Promise.all(
       adminEmails.map((to) =>
@@ -237,6 +238,28 @@ export async function notifyAdminsUnpaidReminder(input: BookingNotificationConte
   });
 }
 
+export async function notifyAdminsCancelRefundReview(
+  input: BookingNotificationContext & { refundNote: string },
+) {
+  return notifyAdmins({
+    bookingId: input.bookingId,
+    templateKey: "admin_cancel_refund_review",
+    subject: `Cancelled: decide advance refund for ${input.customerName}`,
+    vars: { ...bookingVars(input), refund_note: input.refundNote },
+    alwaysEmail: true,
+  });
+}
+
+export async function notifyAdminsEventDayBalance(input: BookingNotificationContext) {
+  return notifyAdmins({
+    bookingId: input.bookingId,
+    templateKey: "admin_event_day_balance",
+    subject: `Today: collect remaining payment from ${input.customerName}`,
+    vars: bookingVars(input),
+    alwaysEmail: true,
+  });
+}
+
 export async function sendCriticalStatusSms(
   input: BookingNotificationContext,
   status: BookingStatus,
@@ -246,7 +269,7 @@ export async function sendCriticalStatusSms(
   const messageByStatus: Record<string, string> = {
     CONFIRMED: `Glow with Rubi: your ${input.packageName} booking on ${input.date} at ${input.time} is confirmed.`,
     REJECTED: `Glow with Rubi: your booking request for ${input.date} could not be approved. Please contact us for help.`,
-    CANCELLED: `Glow with Rubi: your booking for ${input.date} at ${input.time} has been cancelled. Please contact us if you have questions.`,
+    CANCELLED: `Glow with Rubi: your booking for ${input.date} at ${input.time} has been cancelled. If you paid an advance, refunds are decided by the studio (none if the event is under 7 days away).`,
   };
 
   return sendSmsNotification({

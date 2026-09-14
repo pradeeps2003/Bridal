@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { BookingStatusRealtime } from "@/components/account/booking-status-realtime";
 import { StatusTrack } from "@/components/account/status-track";
+import { CustomerCancelButton } from "@/components/booking/customer-cancel";
 import { formatCurrency } from "@/lib/utils";
 import type { Booking, BookingStatus } from "@/types";
 
@@ -36,7 +37,7 @@ function HistoryRow({ booking, openByDefault }: { booking: Booking; openByDefaul
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((value) => !value)}
-        className="grid w-full grid-cols-[1fr_auto] gap-3 px-4 py-4 text-left transition-colors hover:bg-[var(--color-muted)]/40 focus-visible:bg-[var(--color-muted)]/40 sm:grid-cols-[1.1fr_1.6fr_1fr_auto_auto] sm:items-center sm:gap-4"
+        className="grid w-full cursor-pointer grid-cols-[1fr_auto] gap-3 px-4 py-4 text-left transition-colors hover:bg-[var(--color-muted)]/40 focus-visible:bg-[var(--color-muted)]/40 sm:grid-cols-[1.1fr_1.6fr_1fr_auto_auto] sm:items-center sm:gap-4"
       >
         <span>
           <span className="block font-[family-name:var(--font-heading)] text-lg">{formatDate(booking.event_date)}</span>
@@ -46,7 +47,7 @@ function HistoryRow({ booking, openByDefault }: { booking: Booking; openByDefaul
         <span className="text-xs text-[var(--color-muted-foreground)] sm:text-sm">
           {booking.status.replaceAll("_", " ")}
         </span>
-        <span className="text-right text-sm font-medium tabular-nums">{formatCurrency(Number(booking.total) || 0)}</span>
+        <span className="font-numeric text-right text-sm font-medium">{formatCurrency(Number(booking.total) || 0)}</span>
         <span className="col-start-2 row-start-1 flex justify-end text-[var(--color-muted-foreground)] sm:col-auto sm:row-auto">
           {open ? <ChevronUp className="h-4 w-4" aria-hidden="true" /> : <ChevronDown className="h-4 w-4" aria-hidden="true" />}
         </span>
@@ -58,11 +59,21 @@ function HistoryRow({ booking, openByDefault }: { booking: Booking; openByDefaul
             <div><p className="text-[var(--color-muted-foreground)]">Time</p><p className="mt-1">{formatTime(booking.start_time)}</p></div>
             <div><p className="text-[var(--color-muted-foreground)]">Location</p><p className="mt-1 capitalize">{booking.location_type || "—"}</p></div>
             <div><p className="text-[var(--color-muted-foreground)]">Booking ID</p><p className="mt-1 font-mono">{booking.id.slice(0, 8).toUpperCase()}</p></div>
-            <div><p className="text-[var(--color-muted-foreground)]">Balance</p><p className="mt-1 tabular-nums">{formatCurrency(Number(booking.balance) || 0)}</p></div>
+            <div><p className="text-[var(--color-muted-foreground)]">Balance</p><p className="font-numeric mt-1">{formatCurrency(Number(booking.balance) || 0)}</p></div>
           </div>
           {booking.notes && <p className="border-t border-[var(--color-border)] pt-3 text-xs text-[var(--color-muted-foreground)]"><span className="font-medium text-[var(--color-foreground)]">Notes:</span> {booking.notes}</p>}
           <BookingStatusRealtime bookingId={booking.id} initialStatus={booking.status as BookingStatus}>
-            {(status) => <StatusTrack status={status} />}
+            {(status) => (
+              <div className="space-y-3">
+                <StatusTrack status={status} />
+                <CustomerCancelButton
+                  bookingId={booking.id}
+                  status={status}
+                  eventDate={booking.event_date}
+                  advancePaid={Number(booking.advance) > 0 && ["PAYMENT_PENDING", "CONFIRMED"].includes(status)}
+                />
+              </div>
+            )}
           </BookingStatusRealtime>
         </div>
       )}
@@ -76,7 +87,7 @@ export function BookingHistory({ bookings, upcomingId }: { bookings: Booking[]; 
   }
 
   return (
-    <div className="overflow-hidden rounded-sm border border-[var(--color-border)] bg-[var(--color-card)]">
+    <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]">
       <div className="hidden grid-cols-[1.1fr_1.6fr_1fr_auto_auto] gap-4 border-b border-[var(--color-border)] px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-foreground)] sm:grid">
         <span>Date</span><span>Booking</span><span>Status</span><span className="text-right">Total</span><span aria-hidden="true" />
       </div>

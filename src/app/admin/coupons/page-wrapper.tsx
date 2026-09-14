@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAdminNotification } from "@/components/ui/admin-notification";
 import { createCoupon, deleteCoupon, updateCoupon } from "./actions";
 import { Edit2, Plus, Trash2, X } from "lucide-react";
 import type { Coupon } from "@/types";
@@ -19,9 +20,11 @@ export function CouponsPageWrapper({ coupons }: Props) {
   const [addingNew, setAddingNew] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; code: string } | null>(null);
   const [isPending, startTransition] = useTransition();
+  const { showNotification, NotificationComponent } = useAdminNotification();
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {NotificationComponent}
       {coupons.map((coupon) => (
         <Card
           key={coupon.id}
@@ -104,8 +107,16 @@ export function CouponsPageWrapper({ coupons }: Props) {
                 <form
                   key={coupon.id}
                   action={async (fd: FormData) => {
-                    await updateCoupon(coupon.id, fd);
-                    setEditingId(null);
+                    showNotification("loading", "Saving coupon...");
+                    startTransition(async () => {
+                      try {
+                        await updateCoupon(coupon.id, fd);
+                        showNotification("success", "Coupon saved.");
+                        setEditingId(null);
+                      } catch (error) {
+                        showNotification("error", error instanceof Error ? error.message : "Couldn't save coupon.");
+                      }
+                    });
                   }}
                   className="grid gap-4 sm:grid-cols-2"
                 >
@@ -159,7 +170,7 @@ export function CouponsPageWrapper({ coupons }: Props) {
                     <span className="font-medium">Active</span>
                   </label>
                   <div className="flex gap-2 sm:col-span-2 pt-2">
-                    <Button type="submit" variant="accent" size="sm" className="flex-1 border-0">
+                    <Button type="submit" variant="accent" size="sm" className="flex-1 border-0" loading={isPending}>
                       Save Changes
                     </Button>
                     <Button
@@ -195,8 +206,16 @@ export function CouponsPageWrapper({ coupons }: Props) {
             <CardContent className="pt-6 pb-6">
               <form
                 action={async (fd: FormData) => {
-                  await createCoupon(fd);
-                  setAddingNew(false);
+                  showNotification("loading", "Creating coupon...");
+                  startTransition(async () => {
+                    try {
+                      await createCoupon(fd);
+                      showNotification("success", "Coupon created.");
+                      setAddingNew(false);
+                    } catch (error) {
+                      showNotification("error", error instanceof Error ? error.message : "Couldn't create coupon.");
+                    }
+                  });
                 }}
                 className="grid gap-4 sm:grid-cols-2"
               >
@@ -249,7 +268,7 @@ export function CouponsPageWrapper({ coupons }: Props) {
                   <span className="font-medium">Active</span>
                 </label>
                 <div className="flex gap-2 sm:col-span-2 pt-2">
-                  <Button type="submit" variant="accent" size="sm" className="flex-1">
+                  <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                     Create Coupon
                   </Button>
                   <Button type="button" variant="outline" size="sm" onClick={() => setAddingNew(false)}>
@@ -270,7 +289,14 @@ export function CouponsPageWrapper({ coupons }: Props) {
         onConfirm={() => {
           if (itemToDelete) {
             startTransition(async () => {
-              await deleteCoupon(itemToDelete.id);
+              showNotification("loading", "Deleting coupon...");
+              try {
+                await deleteCoupon(itemToDelete.id);
+                showNotification("success", "Coupon deleted.");
+                setItemToDelete(null);
+              } catch (error) {
+                showNotification("error", error instanceof Error ? error.message : "Couldn't delete coupon.");
+              }
             });
           }
         }}

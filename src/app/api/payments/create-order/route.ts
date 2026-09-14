@@ -6,7 +6,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
   if (!isRazorpayConfigured()) {
-    return NextResponse.json({ error: "Payment gateway not configured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "Card checkout is not used. Please pay the advance by UPI on your booking page." },
+      { status: 400 },
+    );
   }
 
   try {

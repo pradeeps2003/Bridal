@@ -29,6 +29,17 @@ export const PRICING_TYPES = [
 
 export type PricingType = (typeof PRICING_TYPES)[number];
 
+export const PACKAGE_TYPES = [
+  "standard",
+  "popular",
+  "most_ordered",
+  "premium",
+  "new_arrival",
+  "limited",
+] as const;
+
+export type PackageType = (typeof PACKAGE_TYPES)[number];
+
 export const PORTFOLIO_CATEGORIES = [
   "Bridal",
   "Reception",
@@ -62,6 +73,7 @@ export interface Package {
   display_order: number;
   inclusions?: string[];
   image_url?: string | null;
+  package_type?: PackageType;
   sale_type?: "none" | "percent" | "amount";
   sale_value?: number;
   sale_starts_at?: string | null;
@@ -109,6 +121,7 @@ export interface BookingSettings {
   min_advance_hours: number;
   hold_duration_hours: number;
   buffer_hours: number;
+  travel_buffer_hours: number;
   cancellation_policy: string;
 }
 
@@ -124,6 +137,28 @@ export interface ServiceSettings {
   travel_charge_base: number;
   travel_charge_per_km: number;
   travel_radius_km: number;
+  long_distance_fixed_fee?: number;
+}
+
+export interface CheckoutSettings {
+  coupons_enabled: boolean;
+}
+
+export interface AboutPillar {
+  title: string;
+  copy: string;
+}
+
+export interface AboutSettings {
+  badge: string;
+  title: string;
+  description: string;
+  artist_label: string;
+  artist_name: string;
+  artist_statement: string;
+  body: string;
+  artist_image_url?: string | null;
+  pillars: AboutPillar[];
 }
 
 export interface Booking {
@@ -191,6 +226,7 @@ export interface Testimonial {
   full_name: string;
   quote: string;
   event_type: string | null;
+  rating: number; // 1-5 star rating
   is_published: boolean;
   created_at: string;
 }

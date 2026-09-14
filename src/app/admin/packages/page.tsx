@@ -6,6 +6,9 @@ import { getAllServices } from "@/lib/data/services";
 import { createClient } from "@/lib/supabase/server";
 import { PackagesPageWrapper } from "./page-wrapper";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function getAllPackagesWithInclusions() {
   const supabase = await createClient();
   const { data } = await supabase

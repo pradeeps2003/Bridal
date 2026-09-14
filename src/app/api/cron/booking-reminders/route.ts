@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
-import {
-  notifyAdminsDecisionReminder,
-  notifyAdminsUnpaidReminder,
-  notifyCustomerPaymentReminder,
-} from "@/lib/notifications/orchestrator";
+import { notifyAdminsDecisionReminder, notifyAdminsEventDayBalance, notifyAdminsUnpaidReminder, notifyCustomerPaymentReminder } from "@/lib/notifications/orchestrator";
 import type { BookingNotificationContext } from "@/lib/notifications/types";
 
 function authorize(request: Request) {
@@ -79,6 +75,13 @@ export async function GET(request: Request) {
     .in("status", ["ADMIN_APPROVED", "PAYMENT_PENDING"])
     .lt("updated_at", staleBefore);
 
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: eventDay } = await supabase
+    .from("bookings")
+    .select("id, event_date, start_time, total, advance, balance, customers(full_name, phone, whatsapp, email), packages(name)")
+    .eq("status", "CONFIRMED")
+    .eq("event_date", today);
+
   let decisionReminders = 0;
   for (const booking of held ?? []) {
     const context = toContext(booking as Parameters<typeof toContext>[0]);
@@ -100,8 +103,17 @@ export async function GET(request: Request) {
     unpaidReminders += 1;
   }
 
+  let eventDayReminders = 0;
+  for (const booking of eventDay ?? []) {
+    const context = toContext(booking as Parameters<typeof toContext>[0]);
+    if (!context) continue;
+    if (await alreadyNotified(context.bookingId, "admin_event_day_balance", since)) continue;
+    await notifyAdminsEventDayBalance(context);
+    eventDayReminders += 1;
+  }
+
   return NextResponse.json({
-    data: { decisionReminders, unpaidReminders },
+    data: { decisionReminders, unpaidReminders, eventDayReminders },
   });
 }
 

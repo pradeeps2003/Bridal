@@ -1,14 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { createPackage, deletePackage, updatePackage } from "@/app/admin/actions";
 import { ConfirmDeleteModal } from "@/components/admin/confirm-delete-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useAdminNotification } from "@/components/ui/admin-notification";
 import { formatCurrency } from "@/lib/utils";
 import type { Service } from "@/types";
 import { Edit2, Plus, Trash2, X } from "lucide-react";
@@ -24,6 +27,7 @@ interface PackageBase {
   display_order: number;
   is_active: boolean;
   image_url?: string | null;
+  package_type?: string | null;
   sale_type?: string | null;
   sale_value?: number | null;
   sale_starts_at?: string | null;
@@ -37,13 +41,17 @@ interface Props {
 }
 
 export function PackagesPageWrapper({ packages, services }: Props) {
+  const router = useRouter();
+  const { showNotification, NotificationComponent } = useAdminNotification();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <>
+      {NotificationComponent}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {packages.map((pkg) => {
         const serviceName = services.find((service) => service.id === pkg.service_id)?.name;
 
@@ -52,7 +60,17 @@ export function PackagesPageWrapper({ packages, services }: Props) {
             key={pkg.id}
             className="flex flex-col transition-colors hover:border-[var(--color-accent)]/50"
           >
-            <CardHeader className="flex-1">
+            <CardHeader className="flex-1 space-y-3">
+              {pkg.image_url ? (
+                <div className="overflow-hidden rounded-xl border border-[var(--color-border)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={pkg.image_url} alt="" className="aspect-[3/2] w-full object-cover" />
+                </div>
+              ) : (
+                <p className="rounded-xl border border-dashed border-[var(--color-border)] px-3 py-6 text-center text-xs text-[var(--color-muted-foreground)]">
+                  No image uploaded yet
+                </p>
+              )}
               <div className="flex items-start justify-between gap-2">
                 <h3 className="pr-2 font-[family-name:var(--font-heading)] text-lg font-semibold text-[var(--color-foreground)]">
                   {pkg.name}
@@ -151,9 +169,20 @@ export function PackagesPageWrapper({ packages, services }: Props) {
                 .map((pkg) => (
                   <form
                     key={pkg.id}
-                    action={async (formData: FormData) => {
-                      await updatePackage(pkg.id, formData);
-                      setEditingId(null);
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      showNotification("loading", "Saving changes...");
+                      startTransition(async () => {
+                        try {
+                          await updatePackage(pkg.id, formData);
+                          showNotification("success", "Changes saved successfully!");
+                          router.refresh();
+                          setEditingId(null);
+                        } catch (error) {
+                          showNotification("error", error instanceof Error ? error.message : "Failed to save changes");
+                        }
+                      });
                     }}
                     className="space-y-4"
                   >
@@ -259,17 +288,11 @@ export function PackagesPageWrapper({ packages, services }: Props) {
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor={`edit-package-image-${pkg.id}`} className="text-xs font-medium">
-                        Image URL
-                      </Label>
-                      <Input
-                        id={`edit-package-image-${pkg.id}`}
-                        name="image_url"
-                        defaultValue={pkg.image_url ?? ""}
-                        className="mt-1 text-sm"
-                      />
-                    </div>
+                    <ImageUploadField
+                      id={`edit-package-image-${pkg.id}`}
+                      currentUrl={pkg.image_url}
+                      label="Package image"
+                    />
 
                     <div>
                       <Label htmlFor={`edit-package-order-${pkg.id}`} className="text-xs font-medium">
@@ -282,6 +305,25 @@ export function PackagesPageWrapper({ packages, services }: Props) {
                         defaultValue={pkg.display_order}
                         className="mt-1 text-sm"
                       />
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`edit-package-type-${pkg.id}`} className="text-xs font-medium">
+                        Package Type
+                      </Label>
+                      <select
+                        id={`edit-package-type-${pkg.id}`}
+                        name="package_type"
+                        defaultValue={pkg.package_type ?? "standard"}
+                        className="mt-1 flex h-9 w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)]"
+                      >
+                        <option value="standard">Standard</option>
+                        <option value="popular">Popular</option>
+                        <option value="most_ordered">Most Ordered</option>
+                        <option value="premium">Premium</option>
+                        <option value="new_arrival">New Arrival</option>
+                        <option value="limited">Limited</option>
+                      </select>
                     </div>
 
                     <div>
@@ -330,7 +372,7 @@ export function PackagesPageWrapper({ packages, services }: Props) {
                     </label>
 
                     <div className="flex gap-2 pt-2">
-                      <Button type="submit" variant="accent" size="sm" className="flex-1">
+                      <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                         Save Changes
                       </Button>
                       <Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
@@ -368,9 +410,20 @@ export function PackagesPageWrapper({ packages, services }: Props) {
 
             <CardContent className="pb-6 pt-6">
               <form
-                action={async (formData: FormData) => {
-                  await createPackage(formData);
-                  setAddingNew(false);
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  showNotification("loading", "Creating package...");
+                  startTransition(async () => {
+                    try {
+                      await createPackage(formData);
+                      showNotification("success", "Package created successfully!");
+                      router.refresh();
+                      setAddingNew(false);
+                    } catch (error) {
+                      showNotification("error", error instanceof Error ? error.message : "Failed to create package");
+                    }
+                  });
                 }}
                 className="space-y-4"
               >
@@ -449,18 +502,32 @@ export function PackagesPageWrapper({ packages, services }: Props) {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="new-package-image" className="text-xs font-medium">
-                    Image URL
-                  </Label>
-                  <Input id="new-package-image" name="image_url" className="mt-1 text-sm" placeholder="https://images..." />
-                </div>
+                <ImageUploadField id="new-package-image" label="Package image" />
 
                 <div>
                   <Label htmlFor="new-package-order" className="text-xs font-medium">
                     Display Order
                   </Label>
                   <Input id="new-package-order" name="display_order" type="number" defaultValue={0} className="mt-1 text-sm" />
+                </div>
+
+                <div>
+                  <Label htmlFor="new-package-type" className="text-xs font-medium">
+                    Package Type
+                  </Label>
+                  <select
+                    id="new-package-type"
+                    name="package_type"
+                    defaultValue="standard"
+                    className="mt-1 flex h-9 w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-1 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)]"
+                  >
+                    <option value="standard">Standard</option>
+                    <option value="popular">Popular</option>
+                    <option value="most_ordered">Most Ordered</option>
+                    <option value="premium">Premium</option>
+                    <option value="new_arrival">New Arrival</option>
+                    <option value="limited">Limited</option>
+                  </select>
                 </div>
 
                 <div>
@@ -499,7 +566,7 @@ export function PackagesPageWrapper({ packages, services }: Props) {
                 </label>
 
                 <div className="flex gap-2 pt-2">
-                  <Button type="submit" variant="accent" size="sm" className="flex-1">
+                  <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                     Create Package
                   </Button>
                   <Button type="button" variant="outline" size="sm" onClick={() => setAddingNew(false)}>
@@ -519,12 +586,21 @@ export function PackagesPageWrapper({ packages, services }: Props) {
         description={`Are you sure you want to delete "${itemToDelete?.name}"?`}
         onConfirm={() => {
           if (itemToDelete) {
+            showNotification("loading", "Deleting package...");
             startTransition(async () => {
-              await deletePackage(itemToDelete.id);
+              try {
+                await deletePackage(itemToDelete.id);
+                showNotification("success", "Package deleted successfully!");
+                router.refresh();
+                setItemToDelete(null);
+              } catch (error) {
+                showNotification("error", error instanceof Error ? error.message : "Failed to delete package");
+              }
             });
           }
         }}
       />
     </div>
+    </>
   );
 }

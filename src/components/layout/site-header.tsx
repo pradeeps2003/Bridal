@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Menu, MessageCircle, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getWhatsAppUrl, resolveWhatsAppNumber } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +62,7 @@ export function SiteHeader({ className }: { className?: string }) {
               <span className="font-[family-name:var(--font-heading)] text-base tracking-tight text-[var(--color-foreground)] sm:text-lg">
                 Glow with Rubi
               </span>
-              <span className="hidden text-[8px] uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] sm:block sm:text-[9px]">
+              <span className="hidden uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] sm:block sm:text-[9px]">
                 Premium Makeup Artistry
               </span>
             </div>

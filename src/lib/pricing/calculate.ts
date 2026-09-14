@@ -28,18 +28,17 @@ export function calculateBookingPrice(input: CalculatePriceInput): PriceBreakdow
   // Travel fee: only for home service; free within radius, charged beyond it
   let travel_fee = 0;
   if (input.locationType === "home" && input.serviceSettings.home_service_enabled) {
-    const radiusKm = input.serviceSettings.travel_radius_km ?? 40;
+    const radiusKm = input.serviceSettings.travel_radius_km ?? 50;
+    const fixedFee = input.serviceSettings.long_distance_fixed_fee ?? 1000;
+    
     if (input.distanceKm !== undefined && input.distanceKm !== null) {
       if (input.distanceKm > radiusKm) {
-        travel_fee =
-          Number(input.serviceSettings.travel_charge_base) +
-          Math.ceil(input.distanceKm - radiusKm) *
-            Number(input.serviceSettings.travel_charge_per_km);
+        travel_fee = fixedFee;
       }
       // else: within free radius, no charge
     } else {
-      // Fallback: flat base fee when distance is unknown
-      travel_fee = Number(input.serviceSettings.travel_charge_base);
+      // Fallback: base charge when unknown
+      travel_fee = Number(input.serviceSettings.travel_charge_base || 0);
     }
   }
 

@@ -8,6 +8,7 @@ export async function GET(request: Request) {
   const parsed = availabilityQuerySchema.safeParse({
     date: searchParams.get("date"),
     package_id: searchParams.get("package_id"),
+    location_type: searchParams.get("location_type") || undefined,
   });
 
   if (!parsed.success) {
@@ -18,7 +19,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const slots = await getSlotsForDate(parsed.data.date, parsed.data.package_id);
+    const slots = await getSlotsForDate(
+      parsed.data.date,
+      parsed.data.package_id,
+      parsed.data.location_type ?? "home",
+    );
     return NextResponse.json({ data: slots });
   } catch (err) {
     console.error("[availability] error:", err);

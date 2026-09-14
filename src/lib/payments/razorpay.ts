@@ -1,15 +1,9 @@
 import crypto from "crypto";
 
-import { getClientEnv, getServerEnv } from "@/lib/env";
+import { getServerEnv } from "@/lib/env";
 
 export function isRazorpayConfigured(): boolean {
-  const server = getServerEnv();
-  const client = getClientEnv();
-  return Boolean(
-    server.RAZORPAY_KEY_ID &&
-      server.RAZORPAY_KEY_SECRET &&
-      client.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-  );
+  return false;
 }
 
 export async function createRazorpayOrder(amount: number, receipt: string) {

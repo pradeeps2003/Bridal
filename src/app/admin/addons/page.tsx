@@ -4,6 +4,9 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { getAllAddons } from "@/lib/data/addons";
 import { AddonsPageWrapper } from "./page-wrapper";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminAddonsPage() {
   const addons = await getAllAddons();
 

@@ -2,7 +2,8 @@ import { PageHero, PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { PackageCardSlider } from "@/components/ui/package-card-slider";
 import { LazyLoad } from "@/components/ui/lazy-load";
-import { JsonLd } from "@/components/seo/json-ld";
+import { GrainOverlay } from "@/components/ui/grain-overlay";
+import { ScrollAnimate, StaggerContainer } from "@/components/ui/scroll-animate";
 import { getActivePackages } from "@/lib/data/packages";
 import { getActiveServices } from "@/lib/data/services";
 import { getPackageSalePrice } from "@/lib/pricing/calculate";
@@ -10,8 +11,14 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
 export const metadata = {
-  title: "Packages & Pricing | Glow with Rubi",
-  description: "Browse bridal, reception, and occasion makeup packages with clear pricing.",
+  title: "Packages & Pricing",
+  description:
+    "Bridal, reception, engagement, and party makeup packages in Pollachi, Coimbatore, Tiruppur, and Tamil Nadu. HD looks, saree draping, and home service pricing.",
+  keywords: [
+    "bridal makeup packages Pollachi",
+    "HD makeup price Coimbatore",
+    "wedding makeup packages Tamil Nadu",
+  ],
 };
 
 interface PageProps {
@@ -41,38 +48,45 @@ export default async function PackagesPage({ searchParams }: PageProps) {
 
   return (
     <PageShell>
-      <JsonLd />
-      <PageHero
-        badge="Transparent pricing"
-        title="Packages"
-        description="Bridal, reception, and occasion looks. Filter by service and book."
-      />
+      {/* Grain texture + sparkle hero area */}
+      <div className="relative overflow-hidden">
+        <GrainOverlay />
+        <div className="relative">
+          <PageHero
+            badge="Transparent pricing"
+            title="Packages"
+            description="Bridal, reception, and occasion looks for Pollachi, Coimbatore, and travel across Tamil Nadu."
+          />
+        </div>
+      </div>
 
-      <section className="container-narrow mb-4 sm:mb-6 lg:mb-8 px-3 sm:px-4 lg:px-6">
-        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
-          <Button
-            variant={!activeServiceSlug ? "modern" : "outline"}
-            asChild
-            className="h-8 sm:h-9 lg:h-10 rounded-full text-[10px] sm:text-xs lg:text-sm"
-            size="sm"
-          >
-            <Link href="/packages">All</Link>
-          </Button>
-          {services.map((s) => (
+      <ScrollAnimate animation="fade-down" delay={0.1}>
+        <section className="container-narrow mb-4 sm:mb-6 lg:mb-8 px-3 sm:px-4 lg:px-6">
+          <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
             <Button
-              key={s.id}
-              variant={activeServiceSlug === s.slug ? "modern" : "outline"}
+              variant={!activeServiceSlug ? "modern" : "outline"}
               asChild
               className="h-8 sm:h-9 lg:h-10 rounded-full text-[10px] sm:text-xs lg:text-sm"
               size="sm"
             >
-              <Link href={`/packages?service=${s.slug}`}>{s.name}</Link>
+              <Link href="/packages">All</Link>
             </Button>
-          ))}
-        </div>
-      </section>
+            {services.map((s) => (
+              <Button
+                key={s.id}
+                variant={activeServiceSlug === s.slug ? "modern" : "outline"}
+                asChild
+                className="h-8 sm:h-9 lg:h-10 rounded-full text-[10px] sm:text-xs lg:text-sm"
+                size="sm"
+              >
+                <Link href={`/packages?service=${s.slug}`}>{s.name}</Link>
+              </Button>
+            ))}
+          </div>
+        </section>
+      </ScrollAnimate>
 
-      <LazyLoad className="container-narrow mb-6 sm:mb-8 lg:mb-12 px-3 sm:px-4 lg:px-6">
+      <ScrollAnimate animation="fade-up" delay={0.2} className="container-narrow mb-6 sm:mb-8 lg:mb-12 px-3 sm:px-4 lg:px-6">
         {packages.length === 0 ? (
           <p className="py-8 sm:py-12 text-center text-xs sm:text-sm text-[var(--color-muted-foreground)]">
             No packages in this category yet.
@@ -80,9 +94,9 @@ export default async function PackagesPage({ searchParams }: PageProps) {
         ) : (
           <PackageCardSlider packages={packagesWithSale} />
         )}
-      </LazyLoad>
+      </ScrollAnimate>
 
-      <LazyLoad className="container-narrow px-4 sm:px-6">
+      <ScrollAnimate animation="scale-up" delay={0.3} className="container-narrow px-4 sm:px-6">
         <div className="mx-auto flex max-w-2xl flex-col items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 sm:p-8 text-center">
           <Sparkles className="mb-3 h-5 w-5 sm:h-6 sm:w-6 text-[var(--color-accent)]" />
           <h3 className="font-[family-name:var(--font-heading)] text-lg sm:text-xl">Need a custom look?</h3>
@@ -95,7 +109,7 @@ export default async function PackagesPage({ searchParams }: PageProps) {
             </Button>
           </div>
         </div>
-      </LazyLoad>
+      </ScrollAnimate>
     </PageShell>
   );
 }

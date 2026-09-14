@@ -8,28 +8,27 @@ import {
 } from "@/components/sections/home-sections";
 import { getActivePackages } from "@/lib/data/packages";
 import { getPublishedTestimonials } from "@/lib/data/testimonials";
-import { QuickStartGuide } from "@/components/onboarding/quick-start-guide";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes
 
 export default async function HomePage() {
   const [bridalPackages, testimonials] = await Promise.all([
-    getActivePackages({ serviceSlug: "bridal", limit: 3 }),
+    getActivePackages({ serviceSlug: "bridal", limit: 4 }),
     getPublishedTestimonials(),
   ]);
 
-  const formattedTestimonials = testimonials.length > 0 
-    ? testimonials.map(t => ({
+  const formattedTestimonials = testimonials.length > 0
+    ? testimonials.map((t) => ({
         quote: t.quote,
         name: t.full_name,
         event: t.event_type || "Client",
+        rating: t.rating || 5,
       }))
     : undefined;
 
   return (
     <>
       <SiteHeader />
-      <QuickStartGuide />
       <main className="bg-[var(--color-background)]">
         <HeroSection />
         <FeaturedPackagesSection packages={bridalPackages} />

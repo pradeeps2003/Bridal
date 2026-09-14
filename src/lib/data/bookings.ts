@@ -81,7 +81,7 @@ export async function getPublicBooking(id: string): Promise<Booking | null> {
   const { data } = await supabase
     .from("bookings")
     .select(
-      "id, status, event_date, start_time, end_time, total, advance, balance, location_type, notes, packages(name, pricing_type), services(name), customers(full_name, phone, whatsapp)",
+      "id, status, event_date, start_time, end_time, total, advance, balance, location_type, notes, admin_notes, packages(name, pricing_type), services(name), customers(full_name, phone, whatsapp, email)",
     )
     .eq("id", id)
     .single();

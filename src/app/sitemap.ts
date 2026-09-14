@@ -1,14 +1,16 @@
 import { MetadataRoute } from "next";
 
+import { getSiteUrl } from "@/lib/seo/site-url";
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://glowwithrubi.com";
+  const baseUrl = getSiteUrl();
 
   return [
     {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: "daily",
-      priority: 1,
+      priority: 1,  
     },
     {
       url: `${baseUrl}/packages`,
@@ -39,6 +41,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/portfolio`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
   ];
 }

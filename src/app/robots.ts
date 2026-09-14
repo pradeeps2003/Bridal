@@ -1,7 +1,9 @@
 import { MetadataRoute } from "next";
 
+import { getSiteUrl } from "@/lib/seo/site-url";
+
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://glowwithrubi.com";
+  const baseUrl = getSiteUrl();
 
   return {
     rules: [

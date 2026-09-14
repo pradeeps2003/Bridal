@@ -1,14 +1,17 @@
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { getPublishedPortfolio } from "@/lib/data/portfolio";
+import { ScrollAnimate, StaggerContainer } from "@/components/ui/scroll-animate";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { PORTFOLIO_CATEGORIES } from "@/types";
 import { Camera, Eye } from "lucide-react";
 
 export const metadata = {
-  title: "Portfolio | Glow with Rubi",
-  description: "Browse our bridal makeup, reception looks, engagement glamour, and client transformations.",
+  title: "Portfolio",
+  description:
+    "Bridal, reception, engagement, and party makeup photos from Pollachi, Coimbatore, and weddings across Tamil Nadu by Glow with Rubi.",
+  keywords: ["bridal makeup portfolio Pollachi", "wedding makeup photos Coimbatore"],
 };
 
 interface PageProps {
@@ -52,48 +55,52 @@ export default async function PortfolioPage({ searchParams }: PageProps) {
       <SiteHeader />
       <main className="min-h-screen bg-gradient-to-b from-[var(--color-muted)]/20 via-[var(--color-background)] to-[var(--color-muted)]/20 dark:from-[var(--color-muted)]/10 dark:via-[var(--color-background)] dark:to-[var(--color-muted)]/10 pt-24 pb-12 lg:pt-28">
         {/* Header */}
-        <section className="container-narrow px-6 text-center space-y-4 mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)]/80 text-[var(--color-on-accent)] text-xs font-semibold uppercase tracking-wider shadow-lg shadow-[var(--color-accent)]/25">
-            <Camera className="w-4 h-4" />
-            ARTISTRY ARCHIVE
-          </div>
-          <h1 className="font-[family-name:var(--font-heading)] text-4xl sm:text-5xl lg:text-6xl tracking-tight text-[var(--color-foreground)]">
-            Lookbook & Portfolio
-          </h1>
-          <p className="max-w-xl mx-auto text-sm text-[var(--color-muted-foreground)] leading-relaxed">
-            A curated showcase of makeup and hair transformations.
-          </p>
-        </section>
+        <ScrollAnimate animation="fade-down" delay={0.1}>
+          <section className="container-narrow px-6 text-center space-y-4 mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)]/80 text-[var(--color-on-accent)] text-xs font-semibold uppercase tracking-wider shadow-lg shadow-[var(--color-accent)]/25">
+              <Camera className="w-4 h-4" />
+              ARTISTRY ARCHIVE
+            </div>
+            <h1 className="font-[family-name:var(--font-heading)] text-4xl sm:text-5xl lg:text-6xl tracking-tight text-[var(--color-foreground)]">
+              Lookbook & Portfolio
+            </h1>
+            <p className="max-w-xl mx-auto text-sm text-[var(--color-muted-foreground)] leading-relaxed">
+              A curated showcase of makeup and hair transformations.
+            </p>
+          </section>
+        </ScrollAnimate>
 
         {/* Categories Navigation */}
-        <section className="container-narrow px-6 mb-8">
-          <div className="sticky top-24 z-40 bg-gradient-to-b from-[var(--color-muted)]/20 via-[var(--color-background)] to-[var(--color-muted)]/20 dark:from-[var(--color-muted)]/10 dark:via-[var(--color-background)] dark:to-[var(--color-muted)]/10 backdrop-blur-xl py-4 -mx-6 px-6">
-            <div className="flex flex-wrap justify-center gap-2">
-              <Button
-                variant={!activeCategory ? "modern" : "outline"}
-                asChild
-                className="rounded-full text-xs tracking-wider uppercase"
-                size="sm"
-              >
-                <Link href="/portfolio">All Archive</Link>
-              </Button>
-              {PORTFOLIO_CATEGORIES.map((cat) => (
+        <ScrollAnimate animation="fade-up" delay={0.2}>
+          <section className="container-narrow px-6 mb-8">
+            <div className="sticky top-24 z-40 bg-gradient-to-b from-[var(--color-muted)]/20 via-[var(--color-background)] to-[var(--color-muted)]/20 dark:from-[var(--color-muted)]/10 dark:via-[var(--color-background)] dark:to-[var(--color-muted)]/10 backdrop-blur-xl py-4 -mx-6 px-6">
+              <div className="flex flex-wrap justify-center gap-2">
                 <Button
-                  key={cat}
-                  variant={activeCategory === cat ? "modern" : "outline"}
+                  variant={!activeCategory ? "modern" : "outline"}
                   asChild
                   className="rounded-full text-xs tracking-wider uppercase"
                   size="sm"
                 >
-                  <Link href={`/portfolio?category=${cat}`}>{cat}</Link>
+                  <Link href="/portfolio">All Archive</Link>
                 </Button>
-              ))}
+                {PORTFOLIO_CATEGORIES.map((cat) => (
+                  <Button
+                    key={cat}
+                    variant={activeCategory === cat ? "modern" : "outline"}
+                    asChild
+                    className="rounded-full text-xs tracking-wider uppercase"
+                    size="sm"
+                  >
+                    <Link href={`/portfolio?category=${cat}`}>{cat}</Link>
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </ScrollAnimate>
 
         {/* Portfolio Grid */}
-        <section className="container-narrow px-6 mb-12">
+        <StaggerContainer staggerDelay={0.1} animation="scale-up" className="container-narrow px-6 mb-12">
           {filteredItems.length === 0 ? (
             <p className="text-center text-sm text-[var(--color-muted-foreground)] py-12">
               No items in this category yet.
@@ -151,20 +158,22 @@ export default async function PortfolioPage({ searchParams }: PageProps) {
               ))}
             </div>
           )}
-        </section>
+        </StaggerContainer>
 
         {/* CTA */}
-        <section className="container-narrow px-6 text-center">
-          <p className="text-xs text-[var(--color-muted-foreground)] mb-4">
-            Interested in a consultation?
-          </p>
-          <Button variant="modern" asChild>
-            <Link href="/book">
-              <Camera className="w-4 h-4 mr-2" />
-              Book Consultation
-            </Link>
-          </Button>
-        </section>
+        <ScrollAnimate animation="fade-up" delay={0.4}>
+          <section className="container-narrow px-6 text-center">
+            <p className="text-xs text-[var(--color-muted-foreground)] mb-4">
+              Interested in a consultation?
+            </p>
+            <Button variant="modern" asChild>
+              <Link href="/book">
+                <Camera className="w-4 h-4 mr-2" />
+                Book Consultation
+              </Link>
+            </Button>
+          </section>
+        </ScrollAnimate>
       </main>
       <SiteFooter />
     </>

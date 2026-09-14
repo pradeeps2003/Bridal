@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,8 @@ import {
   deleteTestimonialAction,
   toggleTestimonialPublishAction,
 } from "@/app/admin/actions";
+import { useAdminNotification } from "@/components/ui/admin-notification";
+import { ConfirmDeleteModal } from "@/components/admin/confirm-delete-modal";
 import { Edit2, Plus, Trash2, X, Star } from "lucide-react";
 import type { Testimonial } from "@/types";
 
@@ -20,13 +23,19 @@ interface Props {
 }
 
 export function TestimonialsPageWrapper({ testimonials }: Props) {
+  const router = useRouter();
+  const { showNotification, NotificationComponent } = useAdminNotification();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const editingItem = testimonials.find((t) => t.id === editingId);
 
   return (
-    <div className="space-y-4">
+    <>
+      {NotificationComponent}
+      <div className="space-y-4">
       {/* Add new button */}
       <div className="flex justify-end">
         <Button
@@ -72,15 +81,29 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
                       </p>
                     )}
                   </div>
-                  <span
-                    className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${
-                      testimonial.is_published
-                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                    }`}
-                  >
-                    {testimonial.is_published ? "Published" : "Pending"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${
+                            star <= (testimonial.rating || 5)
+                              ? "text-yellow-400 fill-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span
+                      className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${
+                        testimonial.is_published
+                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                      }`}
+                    >
+                      {testimonial.is_published ? "Published" : "Pending"}
+                    </span>
+                  </div>
                 </div>
                 <blockquote className="text-sm leading-relaxed text-[var(--color-muted-foreground)] mt-3 line-clamp-3 italic">
                   &ldquo;{testimonial.quote}&rdquo;
@@ -89,18 +112,25 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
               <CardContent className="space-y-2 pt-0">
                 <div className="flex gap-2">
                   {/* Publish/Unpublish */}
-                  <form
-                    action={toggleTestimonialPublishAction.bind(
-                      null,
-                      testimonial.id,
-                      !testimonial.is_published,
-                    )}
-                    className="flex-1"
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-xs"
+                    onClick={() => {
+                      showNotification("loading", "Updating status...");
+                      startTransition(async () => {
+                        try {
+                          await toggleTestimonialPublishAction(testimonial.id, !testimonial.is_published);
+                          showNotification("success", "Status updated successfully!");
+                          router.refresh();
+                        } catch (error) {
+                          showNotification("error", error instanceof Error ? error.message : "Failed to update status");
+                        }
+                      });
+                    }}
                   >
-                    <Button type="submit" variant="outline" size="sm" className="w-full text-xs">
-                      {testimonial.is_published ? "Unpublish" : "Publish"}
-                    </Button>
-                  </form>
+                    {testimonial.is_published ? "Unpublish" : "Publish"}
+                  </Button>
                   {/* Edit */}
                   <Button
                     variant="outline"
@@ -111,20 +141,14 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
                     <Edit2 className="h-3 w-3" />
                   </Button>
                   {/* Delete */}
-                  <form action={deleteTestimonialAction.bind(null, testimonial.id)}>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={(e) => {
-                        if (!confirm(`Delete review from "${testimonial.full_name}"?`))
-                          e.preventDefault();
-                      }}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </form>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => setItemToDelete({ id: testimonial.id, name: testimonial.full_name })}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -150,9 +174,20 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
             </CardHeader>
             <CardContent className="pt-6 space-y-4 pb-6">
               <form
-                action={async (fd: FormData) => {
-                  await updateTestimonial(editingId, fd);
-                  setEditingId(null);
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  showNotification("loading", "Saving changes...");
+                  startTransition(async () => {
+                    try {
+                      await updateTestimonial(editingId, formData);
+                      showNotification("success", "Changes saved successfully!");
+                      router.refresh();
+                      setEditingId(null);
+                    } catch (error) {
+                      showNotification("error", error instanceof Error ? error.message : "Failed to save changes");
+                    }
+                  });
                 }}
                 className="space-y-4"
               >
@@ -175,6 +210,27 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
                   />
                 </div>
                 <div>
+                  <Label className="text-xs font-medium">Rating *</Label>
+                  <div className="flex gap-1 mt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <label key={star} className="cursor-pointer">
+                        <input
+                          type="radio"
+                          name="rating"
+                          value={star}
+                          required
+                          defaultChecked={star === (editingItem.rating || 5)}
+                          className="sr-only peer"
+                        />
+                        <Star
+                          className="w-6 h-6 text-gray-300 peer-checked:text-yellow-400 peer-hover:text-yellow-300 transition-colors"
+                          fill="currentColor"
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
                   <Label className="text-xs font-medium">Review / Quote *</Label>
                   <Textarea
                     name="quote"
@@ -195,7 +251,7 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
                   <span className="font-medium">Publish immediately</span>
                 </label>
                 <div className="flex gap-2 pt-2">
-                  <Button type="submit" variant="accent" size="sm" className="flex-1">
+                  <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                     Save Changes
                   </Button>
                   <Button
@@ -231,9 +287,20 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
             </CardHeader>
             <CardContent className="pt-6 pb-6">
               <form
-                action={async (fd: FormData) => {
-                  await createTestimonial(fd);
-                  setAddingNew(false);
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  showNotification("loading", "Creating testimonial...");
+                  startTransition(async () => {
+                    try {
+                      await createTestimonial(formData);
+                      showNotification("success", "Testimonial created successfully!");
+                      router.refresh();
+                      setAddingNew(false);
+                    } catch (error) {
+                      showNotification("error", error instanceof Error ? error.message : "Failed to create testimonial");
+                    }
+                  });
                 }}
                 className="space-y-4"
               >
@@ -253,6 +320,27 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
                     className="mt-1 text-sm"
                     placeholder="e.g., Bridal Makeup, Reception"
                   />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium">Rating *</Label>
+                  <div className="flex gap-1 mt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <label key={star} className="cursor-pointer">
+                        <input
+                          type="radio"
+                          name="rating"
+                          value={star}
+                          required
+                          defaultChecked={star === 5}
+                          className="sr-only peer"
+                        />
+                        <Star
+                          className="w-6 h-6 text-gray-300 peer-checked:text-yellow-400 peer-hover:text-yellow-300 transition-colors"
+                          fill="currentColor"
+                        />
+                      </label>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <Label className="text-xs font-medium">Review / Quote *</Label>
@@ -275,7 +363,7 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
                   <span className="font-medium">Publish immediately</span>
                 </label>
                 <div className="flex gap-2">
-                  <Button type="submit" variant="accent" size="sm" className="flex-1">
+                  <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                     Add Testimonial
                   </Button>
                   <Button
@@ -292,6 +380,29 @@ export function TestimonialsPageWrapper({ testimonials }: Props) {
           </Card>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={!!itemToDelete}
+        onClose={() => setItemToDelete(null)}
+        title="Delete Testimonial"
+        description={`Are you sure you want to delete review from "${itemToDelete?.name}"?`}
+        onConfirm={() => {
+          if (itemToDelete) {
+            showNotification("loading", "Deleting testimonial...");
+            startTransition(async () => {
+              try {
+                await deleteTestimonialAction(itemToDelete.id);
+                showNotification("success", "Testimonial deleted successfully!");
+                router.refresh();
+                setItemToDelete(null);
+              } catch (error) {
+                showNotification("error", error instanceof Error ? error.message : "Failed to delete testimonial");
+              }
+            });
+          }
+        }}
+      />
     </div>
+    </>
   );
 }

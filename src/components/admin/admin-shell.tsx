@@ -4,15 +4,16 @@ import { redirect } from "next/navigation";
 import { AdminAccountFooter, type AdminIdentity } from "@/components/admin/admin-account-footer";
 import { AdminNav, type AdminMenuItem } from "@/components/admin/admin-nav";
 import { MobileAdminMenu } from "@/components/admin/mobile-admin-menu";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { getCurrentAdmin } from "@/lib/data/admin";
 import { getUnreadEnquiryCount } from "@/lib/data/bookings";
 import type { AdminRole } from "@/types";
 import { Sparkles } from "lucide-react";
 import { AdminRealtime } from "@/components/admin/admin-realtime";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const ADMIN_MENU: readonly AdminMenuItem[] = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
+  { href: "/admin/about", label: "About page", icon: "about", ownerOnly: true },
   { href: "/admin/bookings", label: "Bookings", icon: "calendar" },
   { href: "/admin/enquiries", label: "Enquiries", icon: "enquiries" },
   { href: "/admin/calendar", label: "Calendar", icon: "clock" },
@@ -67,7 +68,6 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         <AdminNav items={visibleMenu} density="rail" />
 
         <div className="space-y-4 border-t border-(--color-border) p-4">
-          <ThemeToggle />
           <AdminAccountFooter admin={adminIdentity} />
         </div>
       </aside>
@@ -88,7 +88,8 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
               Admin
             </span>
           </Link>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <ThemeToggle />
             <AdminRealtime />
           </div>
         </header>

@@ -19,9 +19,9 @@ export function DeliveryHealth({
         <Button variant="link" size="sm" asChild><Link href="/admin/settings/notifications">View delivery log</Link></Button>
       </div>
       <div className="grid grid-cols-3 divide-x divide-[var(--color-border)] border-b border-[var(--color-border)]">
-        <div className="px-4 py-4"><p className="text-[11px] text-[var(--color-muted-foreground)]">Delivered</p><p className="mt-1 font-[family-name:var(--font-heading)] text-2xl tabular-nums">{summary.delivered}</p></div>
-        <div className="px-4 py-4"><p className="text-[11px] text-[var(--color-muted-foreground)]">Sending</p><p className="mt-1 font-[family-name:var(--font-heading)] text-2xl tabular-nums">{summary.sending}</p></div>
-        <div className="px-4 py-4"><p className="text-[11px] text-[var(--color-muted-foreground)]">Failed</p><p className="mt-1 font-[family-name:var(--font-heading)] text-2xl tabular-nums">{summary.failed}</p></div>
+        <div className="px-4 py-4"><p className="text-[11px] text-[var(--color-muted-foreground)]">Delivered</p><p className="mt-1 font-numeric text-2xl">{summary.delivered}</p></div>
+        <div className="px-4 py-4"><p className="text-[11px] text-[var(--color-muted-foreground)]">Sending</p><p className="mt-1 font-numeric text-2xl">{summary.sending}</p></div>
+        <div className="px-4 py-4"><p className="text-[11px] text-[var(--color-muted-foreground)]">Failed</p><p className="mt-1 font-numeric text-2xl">{summary.failed}</p></div>
       </div>
       {recent.length === 0 ? (
         <p className="px-5 py-8 text-sm text-[var(--color-muted-foreground)]">No notifications were sent in this range.</p>

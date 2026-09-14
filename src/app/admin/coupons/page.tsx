@@ -3,6 +3,9 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CouponsPageWrapper } from "./page-wrapper";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function getAllCoupons() {
   const supabase = createAdminClient();
   const { data } = await supabase

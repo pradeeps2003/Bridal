@@ -3,6 +3,7 @@ import { LogOut } from "lucide-react";
 
 import { signOut } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 import type { AdminRole } from "@/types";
 
@@ -36,6 +37,14 @@ export function AdminAccountFooter({
           </p>
         </div>
       )}
+
+      <div className="flex items-center justify-between gap-3 rounded-(--radius-md) border border-(--color-border) px-3 py-2">
+        <div>
+          <p className="text-xs font-medium text-(--color-foreground)">Night mode</p>
+          <p className="text-[11px] text-(--color-muted-foreground)">Dark studio theme</p>
+        </div>
+        <ThemeToggle />
+      </div>
 
       <div className="flex gap-2">
         <Button

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useAdminNotification } from "@/components/ui/admin-notification";
 import { markEnquiryAsReadAction } from "../actions";
 import { Check, Clock, Mail, MessageSquare, Phone, X } from "lucide-react";
 
@@ -23,10 +24,17 @@ interface Props {
 
 export function EnquiriesPageWrapper({ enquiries }: Props) {
   const [isPending, startTransition] = useTransition();
+  const { showNotification, NotificationComponent } = useAdminNotification();
 
   const handleMarkAsRead = (id: string) => {
+    showNotification("loading", "Updating enquiry...");
     startTransition(async () => {
-      await markEnquiryAsReadAction(id);
+      try {
+        await markEnquiryAsReadAction(id);
+        showNotification("success", "Marked as read.");
+      } catch (error) {
+        showNotification("error", error instanceof Error ? error.message : "Couldn't update enquiry.");
+      }
     });
   };
 
@@ -41,6 +49,7 @@ export function EnquiriesPageWrapper({ enquiries }: Props) {
 
   return (
     <div className="grid gap-2 sm:gap-3">
+      {NotificationComponent}
       {enquiries.map((enquiry) => (
         <Card
           key={enquiry.id}
@@ -82,7 +91,7 @@ export function EnquiriesPageWrapper({ enquiries }: Props) {
                 variant="outline"
                 size="sm"
                 onClick={() => handleMarkAsRead(enquiry.id)}
-                disabled={isPending}
+                loading={isPending}
                 className="text-[var(--color-accent)] border-[var(--color-accent)]/30 hover:bg-[var(--color-accent)]/10 h-6 sm:h-7 text-[9px] sm:text-[10px] shrink-0 ml-1"
               >
                 <Check className="h-2 w-2 sm:h-2.5 sm:w-2.5 mr-0.5" />

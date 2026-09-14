@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type {
+  AboutSettings,
   BookingSettings,
+  CheckoutSettings,
   PaymentSettings,
   ServiceSettings,
   SiteSettings,
@@ -14,17 +16,17 @@ const DEFAULT_BUSINESS: SiteSettings = {
   whatsapp: "918526475322",
   instagram: "glow_with_rubi",
   email: "",
-  address: "",
+  address: "Vettaikaranpudur, Pollachi, Coimbatore district, Tamil Nadu",
   google_review_url: "",
 };
-
 
 const DEFAULT_BOOKING: BookingSettings = {
   min_advance_hours: 48,
   hold_duration_hours: 0.25,
   buffer_hours: 0.5,
+  travel_buffer_hours: 2,
   cancellation_policy:
-    "Cancellation must be made at least 48 hours before the event for a full refund of advance.",
+    "You can cancel anytime. If advance was paid, the studio decides any refund. Less than 7 days before the event: no advance return unless the studio chooses otherwise. Remaining balance is collected on the event day.",
 };
 
 const DEFAULT_PAYMENT: PaymentSettings = {
@@ -35,9 +37,30 @@ const DEFAULT_PAYMENT: PaymentSettings = {
 
 const DEFAULT_SERVICE: ServiceSettings = {
   home_service_enabled: true,
-  travel_charge_base: 500,
-  travel_charge_per_km: 15,
-  travel_radius_km: 40,
+  travel_charge_base: 0,
+  travel_charge_per_km: 0,
+  travel_radius_km: 50,
+  long_distance_fixed_fee: 1000,
+};
+
+const DEFAULT_CHECKOUT: CheckoutSettings = {
+  coupons_enabled: true,
+};
+
+const DEFAULT_ABOUT: AboutSettings = {
+  badge: "The artist",
+  title: "Timeless artistry, intentionally crafted",
+  description: "Rubi Sen specializes in skin-first bridal makeup that photographs beautifully.",
+  artist_label: "Meet the artist",
+  artist_name: "Nithiya Rubini",
+  artist_statement: "Makeup is not a mask. It is a refinement of light, texture, and character.",
+  body: "With over three years in luxury bridal work, We’re known for our skin-first approach to bridal makeup. We focus on colour correction and light placement. Looks are built around wardrobe, jewellery, and venue lighting.",
+  artist_image_url: null,
+  pillars: [
+    { title: "Skin inclusivity", copy: "Custom blends for every tone and texture. No ashiness, no oxidation." },
+    { title: "Certified training", copy: "HD and airbrush techniques, built for ceremony light and evening photos." },
+    { title: "Calm presence", copy: "A grounded dressing-room energy so the morning stays serene." },
+  ],
 };
 
 async function fetchSetting<T>(key: string, fallback: T): Promise<T> {
@@ -92,15 +115,45 @@ export async function getServiceSettings(): Promise<ServiceSettings> {
   return fetchSetting("service", DEFAULT_SERVICE);
 }
 
+export async function getCheckoutSettings(): Promise<CheckoutSettings> {
+  const checkout = await fetchSetting("checkout", DEFAULT_CHECKOUT);
+  return { coupons_enabled: checkout.coupons_enabled !== false };
+}
+
+export async function getAboutSettings(): Promise<AboutSettings> {
+  const about = await fetchSetting("about", DEFAULT_ABOUT);
+  const pillars = Array.isArray(about.pillars)
+    ? about.pillars.slice(0, 3).map((pillar, index) => ({
+        title: typeof pillar?.title === "string" && pillar.title.trim()
+          ? pillar.title
+          : DEFAULT_ABOUT.pillars[index].title,
+        copy: typeof pillar?.copy === "string" ? pillar.copy : DEFAULT_ABOUT.pillars[index].copy,
+      }))
+    : DEFAULT_ABOUT.pillars;
+
+  return {
+    badge: typeof about.badge === "string" ? about.badge : DEFAULT_ABOUT.badge,
+    title: typeof about.title === "string" ? about.title : DEFAULT_ABOUT.title,
+    description: typeof about.description === "string" ? about.description : DEFAULT_ABOUT.description,
+    artist_label: typeof about.artist_label === "string" ? about.artist_label : DEFAULT_ABOUT.artist_label,
+    artist_name: typeof about.artist_name === "string" ? about.artist_name : DEFAULT_ABOUT.artist_name,
+    artist_statement: typeof about.artist_statement === "string" ? about.artist_statement : DEFAULT_ABOUT.artist_statement,
+    body: typeof about.body === "string" ? about.body : DEFAULT_ABOUT.body,
+    artist_image_url: typeof about.artist_image_url === "string" ? about.artist_image_url : DEFAULT_ABOUT.artist_image_url,
+    pillars: pillars.length === 3 ? pillars : DEFAULT_ABOUT.pillars,
+  };
+}
+
 export async function getAllSettings() {
-  const [business, booking, payment, service] = await Promise.all([
+  const [business, booking, payment, service, checkout] = await Promise.all([
     getSiteSettings(),
     getBookingSettings(),
     getPaymentSettings(),
     getServiceSettings(),
+    getCheckoutSettings(),
   ]);
 
-  return { business, booking, payment, service };
+  return { business, booking, payment, service, checkout };
 }
 
 export async function updateSiteSetting(

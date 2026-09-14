@@ -7,9 +7,10 @@ import { z } from "zod";
 import { getCurrentAdmin } from "@/lib/data/admin";
 import { canAdmin } from "@/lib/auth/permissions";
 import type { AdminPermission } from "@/lib/notifications/types";
-import { logAudit, updateSiteSetting } from "@/lib/data/settings";
+import { logAudit, updateSiteSetting, getAllSettings, getAboutSettings } from "@/lib/data/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isUploadFile, uploadAdminImage } from "@/lib/media/storage";
 import { capturePendingPayments } from "@/lib/payments/confirm";
 import {
   notifyCustomerPaymentReceived,
@@ -66,6 +67,7 @@ export async function createService(formData: FormData) {
     if (error) throw new Error(error.message);
     await logAudit(admin.id, "create", "services", null, parsed);
     revalidatePath("/admin/services");
+    revalidatePath("/services");
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(error.issues.map(issue => issue.message).join(", "));
@@ -89,6 +91,7 @@ export async function updateService(id: string, formData: FormData) {
     if (error) throw new Error(error.message);
     await logAudit(admin.id, "update", "services", id, parsed);
     revalidatePath("/admin/services");
+    revalidatePath("/services");
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(error.issues.map(issue => issue.message).join(", "));
@@ -104,6 +107,7 @@ export async function deleteService(id: string) {
   if (error) throw new Error(error.message);
   await logAudit(admin.id, "delete", "services", id);
   revalidatePath("/admin/services");
+  revalidatePath("/services");
 }
 
 // --- Packages ---
@@ -119,6 +123,7 @@ const packageSchema = z.object({
   is_active: z.coerce.boolean().default(true),
   inclusions: z.string().optional(),
   image_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  package_type: z.enum(["standard", "popular", "most_ordered", "premium", "new_arrival", "limited"]).default("standard"),
   sale_type: z.enum(["none", "percent", "amount"]).default("none"),
   sale_value: z.coerce.number().min(0, "Sale value must be 0 or greater").default(0),
   sale_starts_at: z.string().optional(),
@@ -131,6 +136,10 @@ export async function createPackage(formData: FormData) {
   
   try {
     const parsed = packageSchema.parse(raw);
+    const imageFile = formData.get("image_file");
+    const uploadedImage = isUploadFile(imageFile)
+      ? await uploadAdminImage(imageFile, "packages")
+      : null;
     const supabase = createAdminClient();
 
     const { data: pkg, error } = await supabase
@@ -145,7 +154,7 @@ export async function createPackage(formData: FormData) {
         duration_hours: parsed.duration_hours,
         display_order: parsed.display_order,
         is_active: parsed.is_active,
-        image_url: parsed.image_url || null,
+        image_url: uploadedImage?.publicUrl ?? (parsed.image_url || null),
         sale_type: parsed.sale_type,
         sale_value: parsed.sale_value,
         sale_starts_at: parsed.sale_starts_at ? new Date(parsed.sale_starts_at).toISOString() : null,
@@ -173,6 +182,7 @@ export async function createPackage(formData: FormData) {
 
     await logAudit(admin.id, "create", "packages", pkg.id, parsed);
     revalidatePath("/admin/packages");
+    revalidatePath("/packages");
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(error.issues.map(issue => issue.message).join(", "));
@@ -187,6 +197,20 @@ export async function updatePackage(id: string, formData: FormData) {
   try {
     const parsed = packageSchema.parse(Object.fromEntries(formData));
     const supabase = createAdminClient();
+    const imageFile = formData.get("image_file");
+    let imageUrl = parsed.image_url || null;
+
+    if (!isUploadFile(imageFile)) {
+      const { data: existingPackage, error: existingError } = await supabase
+        .from("packages")
+        .select("image_url")
+        .eq("id", id)
+        .single();
+      if (existingError) throw new Error(existingError.message);
+      imageUrl = existingPackage?.image_url ?? null;
+    } else {
+      imageUrl = (await uploadAdminImage(imageFile, "packages")).publicUrl;
+    }
 
     const { error } = await supabase
       .from("packages")
@@ -200,7 +224,7 @@ export async function updatePackage(id: string, formData: FormData) {
         duration_hours: parsed.duration_hours,
         display_order: parsed.display_order,
         is_active: parsed.is_active,
-        image_url: parsed.image_url || null,
+        image_url: imageUrl,
         sale_type: parsed.sale_type,
         sale_value: parsed.sale_value,
         sale_starts_at: parsed.sale_starts_at ? new Date(parsed.sale_starts_at).toISOString() : null,
@@ -228,6 +252,7 @@ export async function updatePackage(id: string, formData: FormData) {
 
     await logAudit(admin.id, "update", "packages", id, parsed);
     revalidatePath("/admin/packages");
+    revalidatePath("/packages");
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(error.issues.map(issue => issue.message).join(", "));
@@ -243,34 +268,74 @@ export async function deletePackage(id: string) {
   if (error) throw new Error(error.message);
   await logAudit(admin.id, "delete", "packages", id);
   revalidatePath("/admin/packages");
+  revalidatePath("/packages");
 }
 
 // --- Add-ons ---
 
 const addonSchema = z.object({
-  name: z.string().min(2, "Addon name must be at least 2 characters"),
-  description: z.string().optional(),
-  price: z.coerce.number().min(0, "Price must be 0 or greater"),
-  pricing_type: z.enum(["FIXED", "STARTING_FROM", "CUSTOM_QUOTE"]).default("FIXED"),
-  display_order: z.coerce.number().int().min(0, "Display order must be 0 or greater").default(0),
-  is_active: z.coerce.boolean().default(true),
+  name: z.string().trim().min(2, "Addon name must be at least 2 characters"),
+  description: z.string().trim().optional(),
+  price: z.preprocess((value) => value === "" || value == null ? 0 : value, z.coerce.number().min(0, "Price must be 0 or greater")),
+  pricing_type: z.enum(["FIXED", "STARTING_FROM", "CUSTOM_QUOTE"]).default("CUSTOM_QUOTE"),
+  display_order: z.preprocess((value) => value === "" || value == null ? 0 : value, z.coerce.number().int().min(0, "Display order must be 0 or greater")),
+  is_active: z.boolean(),
 });
+
+function isMissingDbColumn(error: { code?: string; message?: string } | null, column: string) {
+  if (!error) return false;
+  const message = error.message ?? "";
+  return error.code === "PGRST204" || message.includes(`'${column}' column`) || message.includes("schema cache");
+}
+
+async function saveAddonRow(
+  supabase: ReturnType<typeof createAdminClient>,
+  parsed: z.infer<typeof addonSchema>,
+  slug: string,
+  id?: string,
+) {
+  const row = { ...parsed, slug, description: parsed.description ?? null };
+  const query = id
+    ? supabase.from("addons").update(row).eq("id", id)
+    : supabase.from("addons").insert(row);
+  let { error } = await query;
+
+  if (isMissingDbColumn(error, "pricing_type")) {
+    const { pricing_type: _pricingType, ...withoutPricing } = row;
+    const fallback = id
+      ? supabase.from("addons").update(withoutPricing).eq("id", id)
+      : supabase.from("addons").insert(withoutPricing);
+    ({ error } = await fallback);
+  }
+
+  if (error?.code === "23505") throw new Error("An add-on with this name already exists.");
+  if (error) throw new Error(`Could not save add-on: ${error.message}`);
+}
+
+function parseAddonFormData(formData: FormData) {
+  return addonSchema.parse({
+    name: formData.get("name"),
+    description: String(formData.get("description") ?? "").trim() || undefined,
+    price: formData.get("price"),
+    pricing_type: formData.get("pricing_type") ?? "CUSTOM_QUOTE",
+    display_order: formData.get("display_order"),
+    is_active: formData.get("is_active") === "true" || formData.get("is_active") === "on",
+  });
+}
 
 export async function createAddon(formData: FormData) {
   const { admin } = await requireAdmin("catalogue.manage");
   
   try {
-    const parsed = addonSchema.parse(Object.fromEntries(formData));
+    const parsed = parseAddonFormData(formData);
     const supabase = createAdminClient();
+    const slug = slugify(parsed.name);
+    if (!slug) throw new Error("Addon name must contain at least one letter or number.");
 
-    const { error } = await supabase.from("addons").insert({
-      ...parsed,
-      slug: slugify(parsed.name),
-    });
-
-    if (error) throw new Error(error.message);
+    await saveAddonRow(supabase, parsed, slug);
     await logAudit(admin.id, "create", "addons", null, parsed);
     revalidatePath("/admin/addons");
+    revalidatePath("/");
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(error.issues.map(issue => issue.message).join(", "));
@@ -283,17 +348,15 @@ export async function updateAddon(id: string, formData: FormData) {
   const { admin } = await requireAdmin("catalogue.manage");
   
   try {
-    const parsed = addonSchema.parse(Object.fromEntries(formData));
+    const parsed = parseAddonFormData(formData);
     const supabase = createAdminClient();
+    const slug = slugify(parsed.name);
+    if (!slug) throw new Error("Addon name must contain at least one letter or number.");
 
-    const { error } = await supabase
-      .from("addons")
-      .update({ ...parsed, slug: slugify(parsed.name) })
-      .eq("id", id);
-
-    if (error) throw new Error(error.message);
+    await saveAddonRow(supabase, parsed, slug, id);
     await logAudit(admin.id, "update", "addons", id, parsed);
     revalidatePath("/admin/addons");
+    revalidatePath("/");
   } catch (error) {
     if (error instanceof z.ZodError) {
       throw new Error(error.issues.map(issue => issue.message).join(", "));
@@ -309,6 +372,7 @@ export async function deleteAddon(id: string) {
   if (error) throw new Error(error.message);
   await logAudit(admin.id, "delete", "addons", id);
   revalidatePath("/admin/addons");
+  revalidatePath("/");
 }
 
 // --- Portfolio ---
@@ -325,11 +389,14 @@ const portfolioSchema = z.object({
 export async function createPortfolioItem(formData: FormData) {
   const { admin } = await requireAdmin("content.manage");
   const parsed = portfolioSchema.parse(Object.fromEntries(formData));
+  const imageFile = formData.get("image_file");
+  if (!isUploadFile(imageFile)) throw new Error("Please choose a portfolio image.");
+  const imageUrl = (await uploadAdminImage(imageFile, "portfolio")).publicUrl;
   const supabase = createAdminClient();
 
   const { error } = await supabase.from("portfolio_items").insert({
     ...parsed,
-    image_url: parsed.image_url || null,
+    image_url: imageUrl,
     video_url: parsed.video_url || null,
   });
 
@@ -343,13 +410,24 @@ export async function updatePortfolioItem(id: string, formData: FormData) {
   const { admin } = await requireAdmin("content.manage");
   const parsed = portfolioSchema.parse(Object.fromEntries(formData));
   const supabase = createAdminClient();
+  const { data: existingItem, error: existingError } = await supabase
+    .from("portfolio_items")
+    .select("image_url, video_url")
+    .eq("id", id)
+    .single();
+  if (existingError || !existingItem) throw new Error(existingError?.message ?? "Portfolio item not found");
+
+  const imageFile = formData.get("image_file");
+  const imageUrl = isUploadFile(imageFile)
+    ? (await uploadAdminImage(imageFile, "portfolio")).publicUrl
+    : existingItem.image_url;
 
   const { error } = await supabase
     .from("portfolio_items")
     .update({
       ...parsed,
-      image_url: parsed.image_url || null,
-      video_url: parsed.video_url || null,
+      image_url: imageUrl,
+      video_url: parsed.video_url || existingItem.video_url || null,
     })
     .eq("id", id);
 
@@ -369,6 +447,11 @@ export async function deletePortfolioItem(id: string) {
 }
 
 // --- Settings ---
+
+export async function getAdminSettingsAction() {
+  const { admin } = await requireAdmin("settings.manage");
+  return getAllSettings();
+}
 
 export async function updateBusinessSettings(formData: FormData) {
   const { admin } = await requireAdmin("settings.manage");
@@ -396,6 +479,7 @@ export async function updateBookingSettingsAction(formData: FormData) {
       min_advance_hours: Number(formData.get("min_advance_hours")),
       hold_duration_hours: Number(formData.get("hold_duration_hours")),
       buffer_hours: Number(formData.get("buffer_hours")),
+      travel_buffer_hours: Number(formData.get("travel_buffer_hours") || 0),
       cancellation_policy: formData.get("cancellation_policy"),
     },
     admin.id,
@@ -427,6 +511,7 @@ export async function updateServiceSettingsAction(formData: FormData) {
       travel_charge_base: Number(formData.get("travel_charge_base")),
       travel_charge_per_km: Number(formData.get("travel_charge_per_km")),
       travel_radius_km: Number(formData.get("travel_radius_km")),
+      long_distance_fixed_fee: Number(formData.get("long_distance_fixed_fee") || 1000),
     },
     admin.id,
   );
@@ -436,6 +521,8 @@ export async function updateServiceSettingsAction(formData: FormData) {
 export async function updateAllSettingsAction(formData: FormData) {
   const { admin } = await requireAdmin("settings.manage");
   
+  const couponsEnabled = formData.get("coupons_enabled") === "true";
+
   // Update all settings in parallel
   await Promise.all([
     updateSiteSetting(
@@ -457,6 +544,7 @@ export async function updateAllSettingsAction(formData: FormData) {
         min_advance_hours: Number(formData.get("min_advance_hours")),
         hold_duration_hours: Number(formData.get("hold_duration_hours")),
         buffer_hours: Number(formData.get("buffer_hours")),
+        travel_buffer_hours: Number(formData.get("travel_buffer_hours") || 0),
         cancellation_policy: formData.get("cancellation_policy"),
       },
       admin.id,
@@ -478,12 +566,15 @@ export async function updateAllSettingsAction(formData: FormData) {
         travel_charge_base: Number(formData.get("travel_charge_base")),
         travel_charge_per_km: Number(formData.get("travel_charge_per_km")),
         travel_radius_km: Number(formData.get("travel_radius_km")),
+        long_distance_fixed_fee: Number(formData.get("long_distance_fixed_fee") || 1000),
       },
       admin.id,
     ),
+    updateSiteSetting("checkout", { coupons_enabled: couponsEnabled }, admin.id),
   ]);
   
   revalidatePath("/admin/settings");
+  revalidatePath("/");
 }
 
 const adminRoleSchema = z.object({
@@ -533,10 +624,72 @@ export async function updateAdminRoleAction(formData: FormData) {
     from: target.role,
     to: parsed.data.role,
   });
-  revalidatePath("/admin/settings/team");
+  revalidatePath("/admin/settings");
   revalidatePath("/admin");
 }
 
+
+// --- About page ---
+
+const aboutSchema = z.object({
+  badge: z.string().trim().min(2).max(80),
+  title: z.string().trim().min(2).max(160),
+  description: z.string().trim().min(2).max(500),
+  artist_label: z.string().trim().min(2).max(80),
+  artist_name: z.string().trim().min(2).max(120),
+  artist_statement: z.string().trim().min(2).max(500),
+  body: z.string().trim().min(2).max(2000),
+  pillar_0_title: z.string().trim().min(2).max(120),
+  pillar_0_copy: z.string().trim().min(2).max(500),
+  pillar_1_title: z.string().trim().min(2).max(120),
+  pillar_1_copy: z.string().trim().min(2).max(500),
+  pillar_2_title: z.string().trim().min(2).max(120),
+  pillar_2_copy: z.string().trim().min(2).max(500),
+});
+
+export async function updateAboutSettingsAction(formData: FormData) {
+  const { admin } = await requireAdmin("content.manage");
+  const parsed = aboutSchema.parse({
+    badge: formData.get("badge"),
+    title: formData.get("title"),
+    description: formData.get("description"),
+    artist_label: formData.get("artist_label"),
+    artist_name: formData.get("artist_name"),
+    artist_statement: formData.get("artist_statement"),
+    body: formData.get("body"),
+    pillar_0_title: formData.get("pillar_0_title"),
+    pillar_0_copy: formData.get("pillar_0_copy"),
+    pillar_1_title: formData.get("pillar_1_title"),
+    pillar_1_copy: formData.get("pillar_1_copy"),
+    pillar_2_title: formData.get("pillar_2_title"),
+    pillar_2_copy: formData.get("pillar_2_copy"),
+  });
+
+  const existing = await getAboutSettings();
+  const imageFile = formData.get("image_file");
+  const artistImageUrl = isUploadFile(imageFile)
+    ? (await uploadAdminImage(imageFile, "about")).publicUrl
+    : existing.artist_image_url ?? null;
+
+  await updateSiteSetting("about", {
+    badge: parsed.badge,
+    title: parsed.title,
+    description: parsed.description,
+    artist_label: parsed.artist_label,
+    artist_name: parsed.artist_name,
+    artist_statement: parsed.artist_statement,
+    body: parsed.body,
+    artist_image_url: artistImageUrl,
+    pillars: [
+      { title: parsed.pillar_0_title, copy: parsed.pillar_0_copy },
+      { title: parsed.pillar_1_title, copy: parsed.pillar_1_copy },
+      { title: parsed.pillar_2_title, copy: parsed.pillar_2_copy },
+    ],
+  }, admin.id);
+
+  revalidatePath("/admin/about");
+  revalidatePath("/about");
+}
 
 // --- Testimonials ---
 
@@ -544,6 +697,7 @@ const testimonialSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
   quote: z.string().min(5, "Quote must be at least 5 characters"),
   event_type: z.string().optional(),
+  rating: z.coerce.number().int().min(1).max(5, "Rating must be between 1 and 5"),
   is_published: z.coerce.boolean().default(false),
 });
 
@@ -558,6 +712,7 @@ export async function createTestimonial(formData: FormData) {
       full_name: parsed.full_name,
       quote: parsed.quote,
       event_type: parsed.event_type || null,
+      rating: parsed.rating,
       is_published: parsed.is_published,
       booking_id: null,
     });
@@ -587,6 +742,7 @@ export async function updateTestimonial(id: string, formData: FormData) {
         full_name: parsed.full_name,
         quote: parsed.quote,
         event_type: parsed.event_type || null,
+        rating: parsed.rating,
         is_published: parsed.is_published,
       })
       .eq("id", id);

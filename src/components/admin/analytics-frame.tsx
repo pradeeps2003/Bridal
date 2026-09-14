@@ -57,21 +57,21 @@ export function AnalyticsFrame({ analytics }: { analytics: AdminAnalytics }) {
             <TrendingUp className="h-4 w-4 text-green-500" />
             <p className="text-[11px] text-[var(--color-muted-foreground)]">Revenue</p>
           </div>
-          <p className="mt-1 font-[family-name:var(--font-heading)] text-xl tabular-nums">{formatCurrency(analytics.completedRevenue)}</p>
+          <p className="mt-1 font-numeric text-xl">{formatCurrency(analytics.completedRevenue)}</p>
         </div>
         <div className="rounded-lg bg-[var(--color-muted)]/30 p-3">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-blue-500" />
             <p className="text-[11px] text-[var(--color-muted-foreground)]">Bookings</p>
           </div>
-          <p className="mt-1 font-[family-name:var(--font-heading)] text-xl tabular-nums">{analytics.bookingCount}</p>
+          <p className="mt-1 font-numeric text-xl">{analytics.bookingCount}</p>
         </div>
         <div className="rounded-lg bg-[var(--color-muted)]/30 p-3">
           <div className="flex items-center gap-2">
             <PieChart className="h-4 w-4 text-red-500" />
             <p className="text-[11px] text-[var(--color-muted-foreground)]">Cancelled</p>
           </div>
-          <p className="mt-1 font-[family-name:var(--font-heading)] text-xl tabular-nums">{analytics.cancelledCount}</p>
+          <p className="mt-1 font-numeric text-xl">{analytics.cancelledCount}</p>
         </div>
       </div>
 
@@ -175,7 +175,7 @@ export function AnalyticsFrame({ analytics }: { analytics: AdminAnalytics }) {
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs font-semibold tabular-nums">{totalBookings}</span>
+                      <span className="font-numeric text-xs font-semibold">{totalBookings}</span>
                     </div>
                   </div>
                   <div className="flex-1 space-y-1">

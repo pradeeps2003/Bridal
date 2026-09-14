@@ -14,6 +14,7 @@ interface FeedbackDialogProps {
   autoClose?: boolean;
   autoCloseDuration?: number;
   onClose: () => void;
+  showDismissButton?: boolean;
 }
 
 export function FeedbackDialog({
@@ -22,8 +23,9 @@ export function FeedbackDialog({
   message,
   tone = "error",
   autoClose = true,
-  autoCloseDuration = 10000,
+  autoCloseDuration = 5000,
   onClose,
+  showDismissButton = false,
 }: FeedbackDialogProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
@@ -79,28 +81,19 @@ export function FeedbackDialog({
         <div className="flex items-start gap-4">
           <Icon className={cn("mt-0.5 h-6 w-6 shrink-0", iconClass)} aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-4">
-              <h2 id="feedback-dialog-title" className="font-[family-name:var(--font-heading)] text-xl font-semibold">
-                {title}
-              </h2>
-              <button
-                ref={closeButtonRef}
-                type="button"
-                onClick={onClose}
-                aria-label="Close message"
-                className="rounded-md p-1 text-[var(--color-muted-foreground)] transition-colors hover:bg-[var(--color-muted)] hover:text-[var(--color-foreground)]"
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
+            <h2 id="feedback-dialog-title" className="font-[family-name:var(--font-heading)] text-xl font-semibold">
+              {title}
+            </h2>
             <p id="feedback-dialog-message" className="mt-2 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
               {message}
             </p>
-            <div className="mt-5 flex items-center justify-end gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={onClose}>
-                Dismiss
-              </Button>
-            </div>
+            {showDismissButton && (
+              <div className="mt-5 flex items-center justify-end gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={onClose}>
+                  Dismiss
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 

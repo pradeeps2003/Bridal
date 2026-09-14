@@ -19,6 +19,7 @@ export interface ExistingBooking {
   start_time: string;
   end_time: string;
   status: string;
+  location_type?: string;
 }
 
 const ACTIVE_STATUSES = new Set([
@@ -35,6 +36,16 @@ function localDateString(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
+function gapForBooking(
+  existingLocation: string | undefined,
+  requestedLocation: "home" | "studio",
+  bufferMinutes: number,
+  travelBufferMinutes: number,
+) {
+  const needsTravel = existingLocation === "home" || requestedLocation === "home";
+  return bufferMinutes + (needsTravel ? travelBufferMinutes : 0);
+}
+
 function rangesOverlap(
   startA: number,
   endA: number,
@@ -49,6 +60,8 @@ export function getAvailableSlots(options: {
   date: string;
   durationMinutes: number;
   bufferMinutes: number;
+  travelBufferMinutes?: number;
+  requestedLocation?: "home" | "studio";
   slotIntervalMinutes?: number;
   minAdvanceHours: number;
   rules: AvailabilityRule[];
@@ -61,6 +74,8 @@ export function getAvailableSlots(options: {
     date,
     durationMinutes,
     bufferMinutes,
+    travelBufferMinutes = 0,
+    requestedLocation = "home",
     slotIntervalMinutes = 30,
     minAdvanceHours,
     rules,
@@ -117,7 +132,7 @@ export function getAvailableSlots(options: {
           end,
           timeToMinutes(b.start_time.slice(0, 5)),
           timeToMinutes(b.end_time.slice(0, 5)),
-          bufferMinutes,
+          gapForBooking(b.location_type, requestedLocation, bufferMinutes, travelBufferMinutes),
         ),
       );
 

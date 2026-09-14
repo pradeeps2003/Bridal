@@ -47,7 +47,7 @@ export function PackageCard({ pkg, showSaleBadge = false, salePrice, inclusionsP
       className="group equal-card relative overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] transition-all duration-300 hover:shadow-xl hover:border-[var(--color-accent)]/50"
     >
       {hasSale && (
-        <Badge className="absolute right-1.5 sm:right-2 top-1.5 sm:top-2 z-10 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+        <Badge className="absolute right-1.5 top-1.5 z-10 bg-(--color-accent) px-1.5 py-0.5 text-[10px] text-(--color-on-accent) sm:right-2 sm:top-2 sm:px-2 sm:text-xs">
           Sale
         </Badge>
       )}

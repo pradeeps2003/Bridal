@@ -1,22 +1,56 @@
 import { getSiteSettings } from "@/lib/data/settings";
+import { getSiteUrl } from "@/lib/seo/site-url";
+import {
+  SEO_DESCRIPTION,
+  SEO_SERVICES,
+  SERVICE_REGION,
+  SERVICE_TOWNS,
+} from "@/lib/seo/service-area";
 
 export async function JsonLd() {
   const settings = await getSiteSettings();
+  const siteUrl = getSiteUrl();
+  const instagram = settings.instagram
+    ? `https://instagram.com/${settings.instagram.replace(/^@/, "")}`
+    : undefined;
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BeautySalon",
+    "@type": "MakeupArtist",
+    "@id": `${siteUrl}/#artist`,
     name: settings.business_name || "Glow with Rubi",
-    description: "Premium bridal and occasion makeup artistry",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://glowwithrubi.com",
+    alternateName: ["Rubi Makeovers", "Nithiya Rubini", "Glow with Rubi Pollachi"],
+    description: SEO_DESCRIPTION,
+    url: siteUrl,
     telephone: settings.phone,
-    email: settings.email,
+    email: settings.email || undefined,
+    image: `${siteUrl}/og-image.jpg`,
+    sameAs: instagram ? [instagram] : undefined,
     address: {
       "@type": "PostalAddress",
-      streetAddress: settings.address,
-      addressLocality: "Your City",
-      addressRegion: "Your State",
+      streetAddress: settings.address || "Vettaikaranpudur",
+      addressLocality: "Pollachi",
+      addressRegion: SERVICE_REGION,
+      postalCode: "642129",
       addressCountry: "IN",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 10.658,
+      longitude: 77.008,
+    },
+    areaServed: [
+      ...SERVICE_TOWNS.map((name) => ({ "@type": "City", name })),
+      { "@type": "State", name: SERVICE_REGION },
+    ],
+    knowsAbout: SEO_SERVICES,
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Makeup packages",
+      itemListElement: SEO_SERVICES.map((name) => ({
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name, areaServed: SERVICE_REGION },
+      })),
     },
     priceRange: "₹₹₹",
     openingHoursSpecification: [

@@ -5,6 +5,7 @@ import { isSlotAvailable } from "@/lib/data/availability";
 import { getAddonsByIds } from "@/lib/data/addons";
 import {
   getBookingSettings,
+  getCheckoutSettings,
   getPaymentSettings,
   getServiceSettings,
 } from "@/lib/data/settings";
@@ -40,6 +41,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Package not found" }, { status: 404 });
     }
 
+    const checkoutSettings = await getCheckoutSettings();
+    if (input.coupon_code && !checkoutSettings.coupons_enabled) {
+      return NextResponse.json({ error: "Coupons are disabled at checkout." }, { status: 400 });
+    }
+
     // Validate coupon if provided
     let coupon = null;
     if (input.coupon_code) {
@@ -73,7 +79,12 @@ export async function POST(request: Request) {
     const startTime =
       input.start_time.length === 5 ? `${input.start_time}:00` : input.start_time;
 
-    const available = await isSlotAvailable(input.event_date, startTime, input.package_id);
+    const available = await isSlotAvailable(
+      input.event_date,
+      startTime,
+      input.package_id,
+      input.location_type,
+    );
     if (!available) {
       return NextResponse.json({ error: "Selected time slot is no longer available" }, { status: 409 });
     }

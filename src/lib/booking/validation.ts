@@ -56,6 +56,7 @@ export const updateBookingStatusSchema = z.object({
 export const availabilityQuerySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   package_id: z.string().min(1),
+  location_type: z.enum(["home", "studio"]).optional(),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;

@@ -3,13 +3,15 @@ import { NextResponse } from "next/server";
 import { getCurrentAdmin } from "@/lib/data/admin";
 import { getBookingById } from "@/lib/data/bookings";
 import { logAudit } from "@/lib/data/settings";
+import { adminRefundNote } from "@/lib/booking/cancellation";
 import {
+  notifyAdminsCancelRefundReview,
   notifyCustomerPaymentReceived,
   notifyCustomerStatusChange,
   sendCriticalStatusSms,
 } from "@/lib/notifications/orchestrator";
 import { sendReviewRequest } from "@/lib/notifications/reviews";
-import { capturePendingPayments } from "@/lib/payments/confirm";
+import { capturePendingPayments, getBookingPayments } from "@/lib/payments/confirm";
 import { assertTransition } from "@/lib/booking/state-machine";
 import { updateBookingStatusSchema } from "@/lib/booking/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -94,6 +96,15 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     updates.hold_expires_at = null;
   }
 
+  if (parsed.data.status === "CANCELLED") {
+    const payments = await getBookingPayments(id).catch(() => []);
+    const advancePaid = payments.some((p) => p.status === "CAPTURED");
+    const refundNote = adminRefundNote(existing.event_date as string, advancePaid, "admin");
+    const previousNotes = typeof existing.admin_notes === "string" ? existing.admin_notes : "";
+    updates.admin_notes = [parsed.data.admin_notes ?? previousNotes, refundNote].filter(Boolean).join("\n");
+    updates.hold_expires_at = null;
+  }
+
   const { data: booking, error } = await supabase
     .from("bookings")
     .update(updates)
@@ -130,12 +141,21 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   };
 
   const captured = parsed.data.status === "CONFIRMED" ? await capturePendingPayments(id) : [];
+  const cancelPayments =
+    parsed.data.status === "CANCELLED" ? await getBookingPayments(id).catch(() => []) : [];
+  const cancelAdvancePaid = cancelPayments.some((p) => p.status === "CAPTURED");
 
   await Promise.allSettled([
     notifyCustomerStatusChange(notificationContext, parsed.data.status as BookingStatus),
     sendCriticalStatusSms(notificationContext, parsed.data.status as BookingStatus),
     captured.length
       ? notifyCustomerPaymentReceived(notificationContext)
+      : Promise.resolve(),
+    parsed.data.status === "CANCELLED" && cancelAdvancePaid
+      ? notifyAdminsCancelRefundReview({
+          ...notificationContext,
+          refundNote: adminRefundNote(existing.event_date as string, true, "admin"),
+        })
       : Promise.resolve(),
     parsed.data.status === "COMPLETED" ? sendReviewRequest(id) : Promise.resolve(),
   ]);

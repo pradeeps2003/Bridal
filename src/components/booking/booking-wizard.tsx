@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -18,6 +19,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { isNegotiableAddon, visibleBookingAddons } from "@/lib/addons/pricing";
 import { getWhatsAppUrl, resolveWhatsAppNumber } from "@/lib/whatsapp";
 import { calculateBookingPrice } from "@/lib/pricing/calculate";
@@ -47,6 +49,7 @@ interface BookingWizardProps {
   bookingSettings: BookingSettings;
   paymentSettings: PaymentSettings;
   serviceSettings: ServiceSettings;
+  couponsEnabled: boolean;
   businessSettings: SiteSettings;
   preselectedPackage?: string;
 }
@@ -66,6 +69,7 @@ export function BookingWizard({
   bookingSettings,
   paymentSettings,
   serviceSettings,
+  couponsEnabled,
   businessSettings,
   preselectedPackage,
 }: BookingWizardProps) {
@@ -92,10 +96,12 @@ export function BookingWizard({
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<{ title: string; message: string } | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     if (!initialPackage) return;
@@ -138,7 +144,9 @@ export function BookingWizard({
     setLoadingSlots(true);
     setError(null);
     try {
-      const res = await fetch(`/api/availability?date=${eventDate}&package_id=${packageId}`);
+      const res = await fetch(
+        `/api/availability?date=${eventDate}&package_id=${packageId}&location_type=${locationType}`,
+      );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to load slots");
       setSlots(json.data ?? []);
@@ -148,11 +156,11 @@ export function BookingWizard({
     } finally {
       setLoadingSlots(false);
     }
-  }, [packageId, eventDate]);
+  }, [packageId, eventDate, locationType]);
 
   useEffect(() => {
     if (step === 2 && eventDate && packageId) loadSlots();
-  }, [step, eventDate, packageId, loadSlots]);
+  }, [step, eventDate, packageId, locationType, loadSlots]);
 
   function toggleAddon(id: string) {
     setSelectedAddons((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
@@ -173,6 +181,7 @@ export function BookingWizard({
     setCouponError(null);
     setCouponApplied(false);
     setCouponDiscount(0);
+    setApplyingCoupon(true);
 
     try {
       const res = await fetch("/api/coupons/validate", {
@@ -192,9 +201,13 @@ export function BookingWizard({
 
       setCouponApplied(true);
       setCouponDiscount(json.discount || 0);
+      toast.success("Coupon applied!", `You saved ${formatCurrency(json.discount || 0)}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Invalid coupon code";
       setCouponError(message);
+      toast.error("Invalid coupon", message);
+    } finally {
+      setApplyingCoupon(false);
     }
   }
 
@@ -217,7 +230,7 @@ export function BookingWizard({
         location_type: locationType,
         address: locationType === "home" ? address : undefined,
         pincode: locationType === "home" ? pincode : undefined,
-        coupon_code: couponApplied ? couponCode.trim() : undefined,
+        coupon_code: couponsEnabled && couponApplied ? couponCode.trim() : undefined,
         customer: {
           full_name: fullName.trim(),
           phone: phone.trim(),
@@ -248,8 +261,7 @@ export function BookingWizard({
   const minDate = new Date(Date.now() + bookingSettings.min_advance_hours * 3600000).toISOString().slice(0, 10);
   const canLeaveService = Boolean(serviceId);
   const canLeavePackage = Boolean(packageId);
-  const canLeaveSchedule =
-    Boolean(eventDate && startTime) && (locationType === "studio" || (address.trim() && pincode.length === 6));
+  const canLeaveSchedule = Boolean(eventDate && startTime && address.trim() && pincode.length === 6);
   const canSubmit = Boolean(fullName.trim() && phone.trim());
 
   // Scroll to top function
@@ -472,46 +484,32 @@ export function BookingWizard({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {(["home", "studio"] as const).map((type) => (
-              <button key={type} type="button" onClick={() => setLocationType(type)} className={fieldClass(locationType === type)}>
-                <MapPin className={`mx-auto mb-2 h-5 w-5 ${locationType === type ? "text-[var(--color-accent)]" : "text-[var(--color-muted-foreground)]"}`} />
-                <span className="block text-center text-sm font-semibold">
-                  {type === "home" ? "Home service" : "In studio"}
-                </span>
-                <span className="mt-1 block text-center text-[10px] text-[var(--color-muted-foreground)]">
-                  {type === "home"
-                    ? `From ${formatCurrency(serviceSettings.travel_charge_base)} travel`
-                    : "No travel fee"}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {locationType === "home" && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="address">Venue address</Label>
-                <Textarea
-                  id="address"
-                  placeholder="Apartment, street, landmark"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="text-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pincode">Pincode</Label>
-                <Input
-                  id="pincode"
-                  maxLength={6}
-                  value={pincode}
-                  onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
-                  className="text-sm"
-                />
-              </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="address">Venue address</Label>
+              <Textarea
+                id="address"
+                placeholder="Apartment, street, landmark. (E.g. Pollachi)"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="text-sm"
+              />
+              <p className="text-[10px] text-[var(--color-muted-foreground)]">
+                *Travel is free up to {serviceSettings.travel_radius_km}km from Vettaikaranpudur. 
+                A fixed fee of {formatCurrency(serviceSettings.long_distance_fixed_fee || 1000)} applies for longer distances.
+              </p>
             </div>
-          )}
+            <div className="space-y-2">
+              <Label htmlFor="pincode">Pincode</Label>
+              <Input
+                id="pincode"
+                maxLength={6}
+                value={pincode}
+                onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
+                className="text-sm"
+              />
+            </div>
+          </div>
 
           <DatePicker
             id="date"
@@ -532,26 +530,79 @@ export function BookingWizard({
                 Available times
               </Label>
               {loadingSlots ? (
-                <p className="text-sm text-[var(--color-muted-foreground)]">Loading slots…</p>
-              ) : slots.filter((s) => s.available).length > 0 ? (
                 <div className="grid grid-cols-4 gap-2">
-                  {slots
-                    .filter((s) => s.available)
-                    .map((slot) => (
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="h-10 animate-pulse rounded-xl bg-[var(--color-muted)]" />
+                  ))}
+                </div>
+              ) : slots.filter((s) => s.available).length > 0 ? (
+                (() => {
+                  const available = slots.filter((s) => s.available);
+                  const morning = available.filter(s => {
+                    const h = parseInt(s.start_time.split(":")[0]);
+                    return h >= 5 && h < 12;
+                  });
+                  const afternoon = available.filter(s => {
+                    const h = parseInt(s.start_time.split(":")[0]);
+                    return h >= 12 && h < 17;
+                  });
+                  const evening = available.filter(s => {
+                    const h = parseInt(s.start_time.split(":")[0]);
+                    return h >= 17 || h < 5;
+                  });
+
+                  const SlotButton = ({ slot }: { slot: typeof slots[0] }) => {
+                    const time = slot.start_time.slice(0, 5);
+                    const [h, m] = time.split(":").map(Number);
+                    const period = h >= 12 ? "PM" : "AM";
+                    const displayH = h % 12 === 0 ? 12 : h % 12;
+                    const display = `${displayH}:${m.toString().padStart(2, "0")} ${period}`;
+                    const isSelected = startTime === time;
+                    return (
                       <button
-                        key={slot.start_time}
+                        key={time}
                         type="button"
-                        onClick={() => setStartTime(slot.start_time.slice(0, 5))}
-                        className={`h-9 rounded-lg border text-xs ${
-                          startTime === slot.start_time.slice(0, 5)
-                            ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-on-accent)]"
-                            : "border-[var(--color-border)] hover:border-[var(--color-accent)]"
+                        onClick={() => setStartTime(time)}
+                        className={`relative h-11 rounded-xl border text-xs font-medium transition-all duration-150 ${
+                          isSelected
+                            ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-on-accent)] shadow-md scale-105"
+                            : "border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] hover:border-[var(--color-accent)]/60 hover:bg-[var(--color-accent)]/6"
                         }`}
                       >
-                        {slot.start_time.slice(0, 5)}
+                        {display}
                       </button>
-                    ))}
-                </div>
+                    );
+                  };
+
+                  return (
+                    <div className="space-y-3">
+                      {morning.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-muted-foreground)]">🌅 Morning</p>
+                          <div className="grid grid-cols-4 gap-2">
+                            {morning.map(s => <SlotButton key={s.start_time} slot={s} />)}
+                          </div>
+                        </div>
+                      )}
+                      {afternoon.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-muted-foreground)]">☀️ Afternoon</p>
+                          <div className="grid grid-cols-4 gap-2">
+                            {afternoon.map(s => <SlotButton key={s.start_time} slot={s} />)}
+                          </div>
+                        </div>
+                      )}
+                      {evening.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-muted-foreground)]">🌙 Evening</p>
+                          <div className="grid grid-cols-4 gap-2">
+                            {evening.map(s => <SlotButton key={s.start_time} slot={s} />)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()
               ) : (
                 <p className="rounded-lg border border-[var(--color-border)] bg-[var(--color-muted)]/50 p-3 text-xs text-[var(--color-muted-foreground)]">
                   {slots.length > 0
@@ -624,8 +675,9 @@ export function BookingWizard({
               />
               {fieldErrors.email && <p id="email-error" className="text-xs text-[var(--color-destructive)]">{fieldErrors.email}</p>}
             </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="coupon" className="text-sm">Coupon code</Label>
+            {couponsEnabled && (
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="coupon" className="text-sm">Coupon code</Label>
               <div className="flex gap-2">
                 <Input 
                   id="coupon" 
@@ -648,7 +700,8 @@ export function BookingWizard({
                     variant="outline" 
                     size="sm"
                     onClick={applyCoupon}
-                    disabled={!couponCode.trim()}
+                    disabled={!couponCode.trim() || applyingCoupon}
+                    loading={applyingCoupon}
                     className="h-10"
                   >
                     Apply
@@ -671,17 +724,18 @@ export function BookingWizard({
                 )}
               </div>
               {couponError && <p className="text-xs text-[var(--color-destructive)]">{couponError}</p>}
-              {couponApplied && couponDiscount > 0 && (
-                <p className="text-xs text-green-600">Coupon applied! You saved {formatCurrency(couponDiscount)}</p>
-              )}
-            </div>
+                {couponApplied && couponDiscount > 0 && (
+                  <p className="text-xs text-green-600">Coupon applied! You saved {formatCurrency(couponDiscount)}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-muted)]/40 p-4">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--color-accent)]">Review</p>
             <p className="mt-1 font-[family-name:var(--font-heading)] text-lg">{selectedPackage.name}</p>
             <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
-              {selectedService?.name} · {eventDate} at {startTime} · {locationType === "home" ? `Home (${pincode})` : "Studio"}
+              {selectedService?.name} · {eventDate} at {startTime} · Venue ({pincode})
             </p>
             <div className="mt-3 space-y-1.5 text-xs">
               <div className="flex justify-between">
@@ -717,6 +771,11 @@ export function BookingWizard({
                   Hair / jewellery extras are confirmed on WhatsApp after we see the look.
                 </p>
               )}
+              {pricing.travel_fee === 0 && (
+                <p className="text-[10px] text-[var(--color-muted-foreground)]">
+                  Travel fee (if beyond {serviceSettings.travel_radius_km}km) will be confirmed on WhatsApp.
+                </p>
+              )}
               {!pricing.is_custom_quote && finalAdvance > 0 && (
                 <div className="flex items-center justify-between text-[10px]">
                   <span className="flex items-center gap-1">
@@ -732,7 +791,11 @@ export function BookingWizard({
           <div className="flex items-start gap-2 rounded-lg border border-[var(--color-border)] p-3 text-[10px] text-[var(--color-muted-foreground)]">
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-accent)]" />
             <p>
-              Your request will be securely submitted. Rubi will review and confirm your booking date via WhatsApp.
+              {bookingSettings.cancellation_policy}{" "}
+              <Link href="/terms" className="underline underline-offset-2">
+                Terms
+              </Link>
+              .
             </p>
           </div>
 

@@ -1,12 +1,14 @@
 import { PageHero, PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { FAQAccordion } from "@/components/ui/faq-accordion";
-import { LazyLoad } from "@/components/ui/lazy-load";
+import { ScrollAnimate } from "@/components/ui/scroll-animate";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Frequently Asked Questions | Glow with Rubi",
-  description: "Booking holds, travel, cancellation, and products.",
+  title: "FAQ",
+  description:
+    "Bridal makeup booking, home service travel in Tamil Nadu, cancellation, and HD products — Glow with Rubi in Pollachi and Coimbatore.",
+  keywords: ["bridal makeup FAQ Pollachi", "home service makeup Tamil Nadu"],
 };
 
 const FAQ_SECTIONS = [
@@ -24,11 +26,28 @@ const FAQ_SECTIONS = [
     ],
   },
   {
+    title: "Cancellation",
+    items: [
+      {
+        q: "Can I cancel?",
+        a: "Yes, from your booking confirmation page or account. If you have not paid an advance, the date is released. If you have paid, the studio decides any refund.",
+      },
+      {
+        q: "Do I get the advance back?",
+        a: "The studio reviews each case. If the event is less than 7 days away, the advance is not returned unless they choose to help. Refunds, when approved, are sent back on UPI.",
+      },
+      {
+        q: "When is the rest of the money paid?",
+        a: "On the event day, in person. The studio gets a reminder that day to collect the remaining balance.",
+      },
+    ],
+  },
+  {
     title: "Travel",
     items: [
       {
         q: "Do you come to the venue?",
-        a: "Yes. Full hair and makeup setup at home, hotel, or hall. Travel is shown before you confirm.",
+        a: "Yes. Full hair and makeup setup at home, hotel, or hall in Pollachi, Coimbatore, and across Tamil Nadu. Travel is shown before you confirm.",
       },
     ],
   },
@@ -52,11 +71,11 @@ export default function FaqPage() {
         description="Short answers on dates, travel, and how booking works."
       />
 
-      <LazyLoad className="container-narrow mb-8 sm:mb-12 max-w-3xl px-4 sm:px-6">
+      <ScrollAnimate animation="fade-up" delay={0.2} className="container-narrow mb-8 sm:mb-12 max-w-3xl px-4 sm:px-6">
         <FAQAccordion sections={FAQ_SECTIONS} />
-      </LazyLoad>
+      </ScrollAnimate>
 
-      <LazyLoad className="container-narrow px-4 sm:px-6">
+      <ScrollAnimate animation="scale-up" delay={0.3} className="container-narrow px-4 sm:px-6">
         <div className="mx-auto flex max-w-lg flex-col items-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 sm:p-6 text-center">
           <h3 className="font-[family-name:var(--font-heading)] text-lg sm:text-xl">Still need help?</h3>
           <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
@@ -68,7 +87,7 @@ export default function FaqPage() {
             </Button>
           </div>
         </div>
-      </LazyLoad>
+      </ScrollAnimate>
     </PageShell>
   );
 }

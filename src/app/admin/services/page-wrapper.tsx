@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createService, deleteService, updateService } from "@/app/admin/actions";
+import { useAdminNotification } from "@/components/ui/admin-notification";
+import { ConfirmDeleteModal } from "@/components/admin/confirm-delete-modal";
 import { Edit2, Plus, Trash2, X } from "lucide-react";
 import type { Service } from "@/types";
 
@@ -15,11 +18,17 @@ interface Props {
 }
 
 export function ServicesPageWrapper({ services }: Props) {
+  const router = useRouter();
+  const { showNotification, NotificationComponent } = useAdminNotification();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <>
+      {NotificationComponent}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {services.map((service) => (
         <Card
           key={service.id}
@@ -58,19 +67,14 @@ export function ServicesPageWrapper({ services }: Props) {
                 <Edit2 className="h-3 w-3 mr-1" />
                 Edit
               </Button>
-              <form action={deleteService.bind(null, service.id)} className="flex-1">
-                <Button
-                  type="submit"
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={(e) => {
-                    if (!confirm(`Delete "${service.name}"?`)) e.preventDefault();
-                  }}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </form>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => setItemToDelete({ id: service.id, name: service.name })}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -105,9 +109,20 @@ export function ServicesPageWrapper({ services }: Props) {
               {services.filter((s) => s.id === editingId).map((service) => (
                 <form
                   key={service.id}
-                  action={async (fd: FormData) => {
-                    await updateService(service.id, fd);
-                    setEditingId(null);
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    showNotification("loading", "Saving changes...");
+                    startTransition(async () => {
+                      try {
+                        await updateService(service.id, formData);
+                        showNotification("success", "Changes saved successfully!");
+                        router.refresh();
+                        setEditingId(null);
+                      } catch (error) {
+                        showNotification("error", error instanceof Error ? error.message : "Failed to save changes");
+                      }
+                    });
                   }}
                   className="space-y-4"
                 >
@@ -144,7 +159,7 @@ export function ServicesPageWrapper({ services }: Props) {
                     <span className="font-medium">Active</span>
                   </label>
                   <div className="flex gap-2 pt-2">
-                    <Button type="submit" variant="accent" size="sm" className="flex-1">
+                    <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                       Save Changes
                     </Button>
                     <Button
@@ -179,9 +194,20 @@ export function ServicesPageWrapper({ services }: Props) {
             </CardHeader>
             <CardContent className="pt-6">
               <form
-                action={async (fd: FormData) => {
-                  await createService(fd);
-                  setAddingNew(false);
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  showNotification("loading", "Creating service...");
+                  startTransition(async () => {
+                    try {
+                      await createService(formData);
+                      showNotification("success", "Service created successfully!");
+                      router.refresh();
+                      setAddingNew(false);
+                    } catch (error) {
+                      showNotification("error", error instanceof Error ? error.message : "Failed to create service");
+                    }
+                  });
                 }}
                 className="space-y-4"
               >
@@ -208,7 +234,7 @@ export function ServicesPageWrapper({ services }: Props) {
                   <span className="font-medium">Active</span>
                 </label>
                 <div className="flex gap-2">
-                  <Button type="submit" variant="accent" size="sm" className="flex-1">
+                  <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                     Create Service
                   </Button>
                   <Button type="button" variant="outline" size="sm" onClick={() => setAddingNew(false)}>
@@ -220,6 +246,29 @@ export function ServicesPageWrapper({ services }: Props) {
           </Card>
         </div>
       )}
+
+      <ConfirmDeleteModal
+        isOpen={!!itemToDelete}
+        onClose={() => setItemToDelete(null)}
+        title="Delete Service"
+        description={`Are you sure you want to delete "${itemToDelete?.name}"?`}
+        onConfirm={() => {
+          if (itemToDelete) {
+            showNotification("loading", "Deleting service...");
+            startTransition(async () => {
+              try {
+                await deleteService(itemToDelete.id);
+                showNotification("success", "Service deleted successfully!");
+                router.refresh();
+                setItemToDelete(null);
+              } catch (error) {
+                showNotification("error", error instanceof Error ? error.message : "Failed to delete service");
+              }
+            });
+          }
+        }}
+      />
     </div>
+    </>
   );
 }

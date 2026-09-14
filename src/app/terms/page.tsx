@@ -54,10 +54,9 @@ export default function TermsOfServicePage() {
                 <div>
                   <h3 className="font-medium mb-2">Payment Terms</h3>
                   <ul className="list-disc pl-5 text-[var(--color-muted-foreground)] space-y-1">
-                    <li>Advance payment required to confirm booking</li>
-                    <li>Balance payment due before or on service date</li>
-                    <li>Payment methods include UPI, bank transfer, and online payment</li>
-                    <li>All payments are non-refundable unless specified</li>
+                    <li>Advance is paid by UPI after we approve the date</li>
+                    <li>Balance is collected on the event day</li>
+                    <li>Payment methods: UPI</li>
                   </ul>
                 </div>
               </div>
@@ -69,10 +68,11 @@ export default function TermsOfServicePage() {
                 <div>
                   <h3 className="font-medium mb-2">Cancellation Policy</h3>
                   <ul className="list-disc pl-5 text-[var(--color-muted-foreground)] space-y-1">
-                    <li>Cancellations made 30+ days before event: 80% refund of advance</li>
-                    <li>Cancellations made 15-29 days before event: 50% refund of advance</li>
-                    <li>Cancellations made less than 15 days before event: No refund</li>
-                    <li>No-show on scheduled date: Full payment charged</li>
+                    <li>You can cancel from your booking confirmation page</li>
+                    <li>If no advance was paid, cancellation is free</li>
+                    <li>If advance was paid, the studio decides any refund and will contact you</li>
+                    <li>Less than 7 days before the event: advance is not returned, unless the studio chooses otherwise</li>
+                    <li>No-show on the scheduled date: no refund</li>
                   </ul>
                 </div>
                 <div>

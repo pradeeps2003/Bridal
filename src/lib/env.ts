@@ -21,6 +21,8 @@ const clientSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   NEXT_PUBLIC_RAZORPAY_KEY_ID: z.string().min(1).optional(),
   NEXT_PUBLIC_WHATSAPP_NUMBER: z.string().min(8).optional(),
+  NEXT_PUBLIC_GA4_ID: z.string().min(1).optional(),
+  NEXT_PUBLIC_META_PIXEL_ID: z.string().min(1).optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
@@ -66,6 +68,8 @@ export function getClientEnv(): ClientEnv {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_RAZORPAY_KEY_ID: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
     NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
+    NEXT_PUBLIC_GA4_ID: process.env.NEXT_PUBLIC_GA4_ID,
+    NEXT_PUBLIC_META_PIXEL_ID: process.env.NEXT_PUBLIC_META_PIXEL_ID,
   });
 }
 

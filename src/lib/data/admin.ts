@@ -183,21 +183,26 @@ export async function getAdminTeam(): Promise<TeamMember[]> {
 export async function getCurrentAdmin() {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  if (!user) return null;
+    if (authError || !user) return null;
 
-  const { data: admin } = await supabase
-    .from("admins")
-    .select("id, email, full_name, role, is_active")
-    .eq("id", user.id)
-    .eq("is_active", true)
-    .single();
+    const { data: admin } = await supabase
+      .from("admins")
+      .select("id, email, full_name, role, is_active")
+      .eq("id", user.id)
+      .eq("is_active", true)
+      .single();
 
-  if (!admin) return null;
+    if (!admin) return null;
 
-  return { user, admin };
+    return { user, admin };
+  } catch {
+    return null;
+  }
 }

@@ -1,95 +1,92 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, Sparkles, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PackageCard } from "@/components/ui/package-card";
-import { HeroCarousel } from "@/components/sections/hero-carousel";
-import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { getPackageSalePrice } from "@/lib/pricing/calculate";
+import SocialCards from "@/components/ui/card-fan-carousel";
+import { packagesToServices, ServiceCarousel } from "@/components/ui/services-card";
+import { ScrollAnimate } from "@/components/ui/scroll-animate";
 import type { Package } from "@/types";
-import { Sparkles } from "lucide-react";
 
-interface HeroSectionProps {
-  className?: string;
-}
+const FAN_CARDS = [
+  { imgUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?w=800&q=80", alt: "Bridal ceremony look", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&q=80", alt: "Makeup close-up", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80", alt: "Portrait glow", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=800&q=80", alt: "Studio styling", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&q=80", alt: "Occasion glam", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800&q=80", alt: "Reception look", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=800&q=80", alt: "Engagement makeup", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=800&q=80", alt: "Soft glam", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800&q=80", alt: "Wedding day", linkUrl: "/packages" },
+  { imgUrl: "https://images.unsplash.com/photo-1511285560929-80b456503681?w=800&q=80", alt: "Celebratory look", linkUrl: "/packages" },
+];
 
-export function HeroSection({ className }: HeroSectionProps) {
+const MARQUEE = ["HD makeup", "Saree draping", "Jewellery setting", "Home service", "Reception glam", "Engagement looks"];
+
+const POPULAR_TYPES = new Set(["popular", "most_ordered", "premium"]);
+
+export function HeroSection({ className }: { className?: string }) {
   return (
     <section
-      className={`relative overflow-hidden bg-[var(--color-background)] text-[var(--color-foreground)] ${className ?? ""}`}
+      className={`relative isolate overflow-hidden bg-[var(--color-background)] pt-20 ${className ?? ""}`}
+      aria-label="Hero"
     >
-      <div className="absolute inset-0 opacity-90">
-        <div className="absolute -left-16 top-20 h-72 w-72 rounded-full bg-[var(--color-accent)]/20 blur-3xl" aria-hidden />
-        <div className="absolute right-0 top-0 h-80 w-80 rounded-full bg-[var(--color-accent)]/30 blur-3xl" aria-hidden />
-        <div className="absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[var(--color-accent)]/25 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,hsl(345_55%_22%/0.10),transparent_55%)] dark:bg-[radial-gradient(ellipse_at_50%_0%,hsl(40_65%_55%/0.10),transparent_55%)]" />
+
+      <div className="relative z-10 mx-auto max-w-4xl px-4 pt-8 text-center sm:px-6 sm:pt-10">
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 text-[10px] font-semibold uppercase tracking-[0.42em] text-[var(--color-accent)]"
+        >
+          Glow with Rubi · Pollachi
+        </motion.p>
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="font-[family-name:var(--font-heading)] text-4xl font-medium leading-[0.95] text-[var(--color-foreground)] sm:text-6xl"
+        >
+          Made to
+          <span className="mt-1 block italic text-[var(--color-accent)]">glow on camera.</span>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.16 }}
+          className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[var(--color-muted-foreground)]"
+        >
+          Hover a look, fan the deck, or book the date — bridal HD from Pollachi, across Coimbatore and Tamil Nadu.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.24 }}
+          className="mt-6 flex flex-wrap justify-center gap-3"
+        >
+          <Button size="lg" variant="modern" asChild className="h-12 rounded-full px-7">
+            <Link href="/book">Book your date</Link>
+          </Button>
+          <Button size="lg" variant="outline" asChild className="h-12 rounded-full px-7">
+            <Link href="/packages">See signature looks</Link>
+          </Button>
+        </motion.div>
       </div>
 
-      <div className="container-wide relative section-padding pb-10 pt-16 sm:pt-20 lg:pb-14">
-        <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
-          <div className="max-w-2xl space-y-4 sm:space-y-5 lg:space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-accent)]/40 bg-[var(--color-card)]/80 px-3 py-1.5 shadow-[0_10px_25px_rgba(214,127,109,0.08)] backdrop-blur-sm">
-              <span className="h-2 w-2 rounded-full bg-[var(--color-accent)]" aria-hidden />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)] sm:text-xs">
-                GLOW. GRACE. GLAMOUR.
-              </span>
-            </div>
+      <SocialCards cards={FAN_CARDS} />
 
-            <h1 className="text-balance font-[family-name:var(--font-heading)] text-3xl font-bold leading-[0.92] text-[var(--color-foreground)] sm:text-4xl lg:text-[4.5rem]">
-              Where every bride
-              <span className="mt-2 block bg-gradient-to-r from-[var(--color-accent)] via-[var(--color-accent)]/80 to-[var(--color-accent)]/60 bg-clip-text text-transparent">
-                glows with intention
-              </span>
-            </h1>
-
-            <p className="max-w-xl text-sm leading-relaxed text-[var(--color-muted-foreground)] sm:text-base">
-              HD makeup, saree draping, and jewellery styling — built for the length of a real wedding day.
-            </p>
-
-            <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-stretch">
-              <Button
-                size="lg"
-                variant="modern"
-                asChild
-                className="h-12 w-full sm:flex-1"
-              >
-                <Link href="/book" data-quick-start="book">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Check Availability
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                asChild
-                className="h-12 w-full border-[var(--color-border)] bg-[var(--color-card)]/80 text-[var(--color-foreground)] sm:flex-1"
-              >
-                <Link href="/packages" data-quick-start="packages">View Packages</Link>
-              </Button>
-            </div>
-
-            <div className="grid max-w-xl grid-cols-3 items-stretch gap-2 sm:gap-3 pt-2 sm:pt-3 lg:pt-4">
-              {[
-                "Saree Draping Styles",
-                "HD & Non-HD Options",
-                "Home Service Available",
-              ].map((stat, index) => (
-                <div
-                  key={index}
-                  className="equal-card rounded-xl sm:rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]/80 p-2 sm:p-3 flex items-center justify-center"
-                >
-                  <p className="font-[family-name:var(--font-heading)] text-[10px] sm:text-xs lg:text-sm font-bold text-[var(--color-accent)] text-center leading-tight">
-                    {stat}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-md lg:mx-0 order-last">
-            <HeroCarousel />
-          </div>
+      <div className="relative z-10 overflow-hidden border-t border-[var(--color-border)] py-3">
+        <div className="flex w-max animate-[marquee-x_28s_linear_infinite] gap-10 pr-10 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">
+          {[...MARQUEE, ...MARQUEE].map((item, i) => (
+            <span key={`${item}-${i}`} className="inline-flex items-center gap-3">
+              <Sparkles className="h-3 w-3 text-[var(--color-accent)]" aria-hidden="true" />
+              {item}
+            </span>
+          ))}
         </div>
       </div>
     </section>
@@ -97,132 +94,139 @@ export function HeroSection({ className }: HeroSectionProps) {
 }
 
 export function FeaturedPackagesSection({ packages }: { packages: Package[] }) {
-  const featured = packages.slice(0, 3);
+  const [tab, setTab] = useState<"signature" | "popular">("signature");
+  const signature = packages.slice(0, 4);
+  const popular = packages.filter((pkg) => POPULAR_TYPES.has(pkg.package_type ?? "") || /premium|luxury/i.test(pkg.name)).slice(0, 4);
+  const slides = tab === "popular" && popular.length ? popular : signature;
 
   return (
     <section className="section-padding bg-[var(--color-background)]">
       <div className="container-narrow">
-        <ScrollReveal>
-          <div className="mb-4 sm:mb-6 lg:mb-8 flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <ScrollAnimate animation="fade-up" delay={0.08}>
+          <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 px-2 py-1 sm:px-3 sm:py-1 rounded-full bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 mb-2">
-                <Sparkles className="w-3 h-3 text-[var(--color-accent)]" />
-                <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-                  Bridal Packages
-                </p>
-              </div>
-              <h2 className="font-[family-name:var(--font-heading)] text-xl sm:text-2xl lg:text-3xl text-[var(--color-foreground)]">
-                Curated Packages
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">
+                Signature lookbook
+              </p>
+              <h2 className="max-w-md font-[family-name:var(--font-heading)] text-3xl text-[var(--color-foreground)] sm:text-4xl">
+                A few looks. Chosen, not listed.
               </h2>
             </div>
-            <Link
-              href="/packages"
-              className="text-xs sm:text-sm font-medium uppercase tracking-[0.12em] text-[var(--color-accent)] hover:text-[var(--color-accent)]/80 transition-colors"
-            >
-              View all packages →
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex rounded-full border border-[var(--color-border)] p-1">
+                {(["signature", "popular"] as const).map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setTab(id)}
+                    className={`cursor-pointer rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] ${
+                      tab === id
+                        ? "bg-[var(--color-button)] text-[var(--color-on-button)]"
+                        : "text-[var(--color-muted-foreground)]"
+                    }`}
+                  >
+                    {id}
+                  </button>
+                ))}
+              </div>
+              <Link
+                href="/packages"
+                className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--color-accent)]"
+              >
+                Full catalogue →
+              </Link>
+            </div>
           </div>
-        </ScrollReveal>
-
-        {/* Static grid layout for all devices */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {featured.map((pkg, index) => {
-            const salePrice = getPackageSalePrice(pkg);
-            return (
-              <ScrollReveal key={pkg.id} delay={index * 100} className="relative h-full">
-                {index === 1 && (
-                  <span className="absolute right-3 top-3 z-20 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent)]/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-on-accent)] rounded-full shadow-lg shadow-[var(--color-accent)]/25">
-                    Popular
-                  </span>
-                )}
-                <PackageCard
-                  pkg={pkg}
-                  showSaleBadge={!!salePrice}
-                  salePrice={salePrice || undefined}
-                  inclusionsPreview={2}
-                />
-              </ScrollReveal>
-            );
-          })}
-        </div>
+        </ScrollAnimate>
+        <ServiceCarousel services={packagesToServices(slides)} />
       </div>
     </section>
   );
 }
 
-export function TestimonialsSection({ testimonials: initialTestimonials }: { testimonials?: Array<{ quote: string; name: string; event: string }> }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [testimonials, setTestimonials] = useState(
-    initialTestimonials || [
-      {
-        quote:
-          "Rubi understood exactly the soft, glowing look I wanted. I felt like myself — just the most radiant version.",
-        name: "Ananya S.",
-        event: "Bridal",
-      },
-      {
-        quote:
-          "Professional, calm, and incredibly skilled. My makeup lasted through the ceremony, photos, and reception.",
-        name: "Priya M.",
-        event: "Reception",
-      },
-      {
-        quote:
-          "The home service was seamless. She arrived on time with everything organized. Truly premium experience.",
-        name: "Kavya R.",
-        event: "Engagement",
-      },
-    ]
-  );
+export function TestimonialsSection({
+  testimonials: initialTestimonials,
+}: {
+  testimonials?: Array<{ quote: string; name: string; event: string; rating?: number }>;
+}) {
+  const testimonials = initialTestimonials?.length
+    ? initialTestimonials.slice(0, 4)
+    : [
+        {
+          quote: "Rubi understood exactly the soft, glowing look I wanted. I felt like myself — just the most radiant version.",
+          name: "Ananya S.",
+          event: "Bridal",
+          rating: 5,
+        },
+        {
+          quote: "Professional, calm, and incredibly skilled. My makeup lasted through the ceremony, photos, and reception.",
+          name: "Priya M.",
+          event: "Reception",
+          rating: 5,
+        },
+        {
+          quote: "The home service was seamless. She arrived on time with everything organized.",
+          name: "Kavya R.",
+          event: "Engagement",
+          rating: 5,
+        },
+      ];
+
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-
-    return () => clearInterval(timer);
+    const timer = window.setInterval(() => {
+      setIndex((prev) => (prev + 1) % testimonials.length);
+    }, 6000);
+    return () => window.clearInterval(timer);
   }, [testimonials.length]);
 
-  return (
-    <section className="section-padding bg-gradient-to-b from-[var(--color-muted)]/20 to-[var(--color-background)] dark:from-[var(--color-muted)]/10 dark:to-[var(--color-background)]">
-      <div className="container-narrow">
-        <ScrollReveal>
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-card)] border border-[var(--color-border)] mb-3">
-              <Sparkles className="w-3 h-3 text-[var(--color-accent)]" />
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-                Testimonials
-              </p>
-            </div>
-            <h2 className="font-[family-name:var(--font-heading)] text-3xl text-[var(--color-foreground)]">
-              Kind words
-            </h2>
-          </div>
-        </ScrollReveal>
+  const current = testimonials[index];
 
-        <div className="mt-4 sm:mt-6">
-          <ScrollReveal>
-            <blockquote className="equal-card max-w-2xl mx-auto rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 sm:p-5">
-              <p className="text-sm sm:text-base leading-relaxed text-[var(--color-muted-foreground)]">
-                &ldquo;{testimonials[currentIndex].quote}&rdquo;
-              </p>
-              <footer className="mt-3 sm:mt-4 border-t border-[var(--color-border)] pt-2 sm:pt-3">
-                <p className="text-sm font-medium text-[var(--color-foreground)]">{testimonials[currentIndex].name}</p>
-                <p className="text-xs text-[var(--color-muted-foreground)]">{testimonials[currentIndex].event}</p>
-              </footer>
-            </blockquote>
-            <div className="flex justify-center gap-2 mt-2 sm:mt-3">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`h-2 w-2 rounded-full transition-all ${
-                    index === currentIndex ? "w-4 sm:w-6 bg-[var(--color-accent)]" : "bg-[var(--color-muted)]"
-                  }`}
-                />
+  return (
+    <section className="relative overflow-hidden bg-[hsl(345_40%_8%)] py-20 text-white sm:py-24">
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <Image
+          src="https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=60"
+          alt=""
+          fill
+          className="object-cover blur-2xl"
+        />
+      </div>
+      <div className="absolute inset-0 bg-[hsl(345_40%_8%)]/78" />
+      <div className="container-narrow relative mx-auto max-w-3xl px-4 text-center">
+        <p className="mb-8 text-[10px] font-semibold uppercase tracking-[0.32em] text-[var(--color-accent)]">Kind words</p>
+        <AnimatePresence mode="wait">
+          <motion.blockquote
+            key={current.name + index}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.45 }}
+          >
+            <div className="mb-5 flex justify-center gap-1">
+              {Array.from({ length: current.rating || 5 }).map((_, i) => (
+                <Star key={i} className="h-4 w-4 fill-[var(--color-accent)] text-[var(--color-accent)]" />
               ))}
             </div>
-          </ScrollReveal>
+            <p className="font-[family-name:var(--font-heading)] text-2xl leading-snug text-white sm:text-4xl">
+              “{current.quote}”
+            </p>
+            <footer className="mt-8 text-xs uppercase tracking-[0.22em] text-white/60">
+              {current.name} · {current.event}
+            </footer>
+          </motion.blockquote>
+        </AnimatePresence>
+        <div className="mt-10 flex justify-center gap-2">
+          {testimonials.map((item, i) => (
+            <button
+              key={item.name}
+              type="button"
+              aria-label={`Show ${item.name}`}
+              onClick={() => setIndex(i)}
+              className={`h-1.5 cursor-pointer rounded-full ${i === index ? "w-8 bg-[var(--color-accent)]" : "w-3 bg-white/30"}`}
+            />
+          ))}
         </div>
       </div>
     </section>
@@ -233,7 +237,7 @@ export function FaqPreviewSection() {
   const faqs = [
     {
       q: "How far in advance should I book?",
-      a: "We recommend booking 3–6 months ahead for wedding season. Last-minute dates may be available.",
+      a: "We recommend booking 3–6 months ahead for wedding season. Last-minute dates may still be available.",
     },
     {
       q: "Do you travel for home service?",
@@ -244,39 +248,49 @@ export function FaqPreviewSection() {
       a: "Each package lists its inclusions — makeup, hairstyle, draping, and accessories.",
     },
   ];
+  const [open, setOpen] = useState(0);
 
   return (
-    <section className="section-padding bg-gradient-to-b from-[var(--color-background)] to-[var(--color-muted)]/20 dark:from-[var(--color-background)] dark:to-[var(--color-muted)]/10">
-      <div className="container-narrow">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/30 mb-2">
-              <Sparkles className="w-3 h-3 text-[var(--color-accent)]" />
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
-                FAQ
-              </p>
-            </div>
-            <h2 className="font-[family-name:var(--font-heading)] text-3xl text-[var(--color-foreground)]">
-              Common questions
-            </h2>
-            <Link
-              href="/faq"
-              className="mt-3 inline-block text-sm font-medium uppercase tracking-[0.12em] text-[var(--color-accent)] hover:text-[var(--color-accent)]/80 transition-colors"
-            >
-              View all FAQs →
-            </Link>
-          </div>
-
-          <dl className="space-y-3">
-            {faqs.map((faq) => (
-              <div key={faq.q} className="bg-[var(--color-card)] p-3 rounded-xl border border-[var(--color-border)] shadow-sm">
-                <dt className="font-[family-name:var(--font-heading)] text-base text-[var(--color-foreground)]">{faq.q}</dt>
-                <dd className="mt-1 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                  {faq.a}
-                </dd>
+    <section className="section-padding bg-[var(--color-background)]">
+      <div className="container-narrow grid items-start gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+        <ScrollAnimate animation="fade-left" delay={0.08}>
+          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--color-accent)]">FAQ</p>
+          <h2 className="font-[family-name:var(--font-heading)] text-3xl text-[var(--color-foreground)] sm:text-4xl">
+            Before you book
+          </h2>
+          <Link href="/faq" className="mt-4 inline-block text-xs font-medium uppercase tracking-[0.14em] text-[var(--color-accent)]">
+            All questions →
+          </Link>
+        </ScrollAnimate>
+        <div className="divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
+          {faqs.map((faq, index) => {
+            const isOpen = open === index;
+            return (
+              <div key={faq.q}>
+                <button
+                  type="button"
+                  onClick={() => setOpen(isOpen ? -1 : index)}
+                  className="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left"
+                  aria-expanded={isOpen}
+                >
+                  <span className="font-[family-name:var(--font-heading)] text-xl text-[var(--color-foreground)]">{faq.q}</span>
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-[var(--color-accent)] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen ? (
+                    <motion.p
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden pb-5 text-sm leading-relaxed text-[var(--color-muted-foreground)]"
+                    >
+                      {faq.a}
+                    </motion.p>
+                  ) : null}
+                </AnimatePresence>
               </div>
-            ))}
-          </dl>
+            );
+          })}
         </div>
       </div>
     </section>

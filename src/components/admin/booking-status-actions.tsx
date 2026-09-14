@@ -20,11 +20,18 @@ interface BookingStatusActionsProps {
   actions: BookingAction[];
   customerPhone?: string;
   customerName?: string;
+  remainingBalance?: number;
 }
 
-export function BookingStatusActions({ bookingId, actions, customerPhone, customerName }: BookingStatusActionsProps) {
+export function BookingStatusActions({
+  bookingId,
+  actions,
+  customerPhone,
+  customerName,
+  remainingBalance = 0,
+}: BookingStatusActionsProps) {
   const router = useRouter();
-  const [pendingStatus, setPendingStatus] = useState<BookingStatus | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<BookingStatus | "BALANCE" | null>(null);
   const [feedback, setFeedback] = useState<{ title: string; message: string; tone?: "success" | "error" | "info" } | null>(null);
 
   async function updateStatus(status: BookingStatus) {
@@ -50,7 +57,7 @@ export function BookingStatusActions({ bookingId, actions, customerPhone, custom
       const messageMap: Record<string, string> = {
         ADMIN_APPROVED: "Booking has been approved successfully. You can notify the customer via WhatsApp below.",
         REJECTED: "Booking has been rejected.",
-        CANCELLED: "Booking has been cancelled. Revenue total updated.",
+        CANCELLED: "Booking cancelled. If advance was paid, decide the refund yourself and send it on UPI if you approve it.",
         CONFIRMED: "Booking and payment confirmed successfully.",
         COMPLETED: "Service completed successfully.",
       };
@@ -66,6 +73,30 @@ export function BookingStatusActions({ bookingId, actions, customerPhone, custom
       setFeedback({
         title: "Status update failed",
         message: error instanceof Error ? error.message : "The booking status could not be updated.",
+        tone: "error",
+      });
+    } finally {
+      setPendingStatus(null);
+    }
+  }
+
+  async function markBalancePaid() {
+    setPendingStatus("BALANCE");
+    setFeedback(null);
+    try {
+      const response = await fetch(`/api/bookings/${bookingId}/balance-paid`, { method: "POST" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "Could not mark balance paid.");
+      setFeedback({
+        title: "Balance marked paid",
+        message: "That amount is now included in revenue.",
+        tone: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      setFeedback({
+        title: "Could not mark paid",
+        message: error instanceof Error ? error.message : "Try again.",
         tone: "error",
       });
     } finally {
@@ -100,7 +131,18 @@ export function BookingStatusActions({ bookingId, actions, customerPhone, custom
             {pendingStatus === action.status ? "Updating…" : action.label}
           </Button>
         ))}
-        {customerPhone && (
+        {remainingBalance > 0 && (
+          <Button
+            type="button"
+            variant="accent"
+            size="default"
+            onClick={markBalancePaid}
+            disabled={pendingStatus !== null}
+            className="min-h-[44px]"
+          >
+            {pendingStatus === "BALANCE" ? "Saving…" : "Mark balance paid"}
+          </Button>
+        )}
           <Button
             type="button"
             variant="outline"

@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ConfirmDeleteModal } from "@/components/admin/confirm-delete-modal";
+import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useNotification } from "@/components/ui/notification-toast";
 import { createPortfolioItem, deletePortfolioItem, updatePortfolioItem } from "@/app/admin/actions";
 import { Edit2, Plus, Trash2, X } from "lucide-react";
 import { PORTFOLIO_CATEGORIES } from "@/types";
@@ -16,13 +19,17 @@ interface Props {
 }
 
 export function PortfolioPageWrapper({ items }: Props) {
+  const router = useRouter();
+  const { showNotification, NotificationComponent } = useNotification();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string; title: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <>
+      {NotificationComponent}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <Card
           key={item.id}
@@ -109,8 +116,15 @@ export function PortfolioPageWrapper({ items }: Props) {
                 <form
                   key={item.id}
                   action={async (fd: FormData) => {
-                    await updatePortfolioItem(item.id, fd);
-                    setEditingId(null);
+                    showNotification("loading", "Saving changes...");
+                    try {
+                      await updatePortfolioItem(item.id, fd);
+                      showNotification("success", "Changes saved successfully!");
+                      router.refresh();
+                      setEditingId(null);
+                    } catch (error) {
+                      showNotification("error", error instanceof Error ? error.message : "Failed to save changes");
+                    }
                   }}
                   className="space-y-4"
                 >
@@ -130,10 +144,7 @@ export function PortfolioPageWrapper({ items }: Props) {
                       ))}
                     </select>
                   </div>
-                  <div>
-                    <Label className="text-xs font-medium">Image URL</Label>
-                    <Input name="image_url" defaultValue={item.image_url ?? ""} className="mt-1 text-sm" />
-                  </div>
+                  <ImageUploadField id={`edit-portfolio-image-${item.id}`} currentUrl={item.image_url} label="Portfolio image" />
                   <div>
                     <Label className="text-xs font-medium">Display Order</Label>
                     <Input name="display_order" type="number" defaultValue={item.display_order} className="mt-1 text-sm" />
@@ -149,7 +160,7 @@ export function PortfolioPageWrapper({ items }: Props) {
                     <span className="font-medium">Published</span>
                   </label>
                   <div className="flex gap-2 pt-2">
-                    <Button type="submit" variant="accent" size="sm" className="flex-1">
+                    <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                       Save Changes
                     </Button>
                     <Button
@@ -185,8 +196,15 @@ export function PortfolioPageWrapper({ items }: Props) {
             <CardContent className="pt-6 pb-6">
               <form
                 action={async (fd: FormData) => {
-                  await createPortfolioItem(fd);
-                  setAddingNew(false);
+                  showNotification("loading", "Creating item...");
+                  try {
+                    await createPortfolioItem(fd);
+                    showNotification("success", "Item created successfully!");
+                    router.refresh();
+                    setAddingNew(false);
+                  } catch (error) {
+                    showNotification("error", error instanceof Error ? error.message : "Failed to create item");
+                  }
                 }}
                 className="space-y-4"
               >
@@ -205,10 +223,7 @@ export function PortfolioPageWrapper({ items }: Props) {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <Label className="text-xs font-medium">Image URL *</Label>
-                  <Input name="image_url" type="url" required placeholder="https://..." className="mt-1 text-sm" />
-                </div>
+                <ImageUploadField id="new-portfolio-image" label="Portfolio image" required />
                 <div>
                   <Label className="text-xs font-medium">Display Order</Label>
                   <Input name="display_order" type="number" defaultValue={0} className="mt-1 text-sm" />
@@ -224,7 +239,7 @@ export function PortfolioPageWrapper({ items }: Props) {
                   <span className="font-medium">Published</span>
                 </label>
                 <div className="flex gap-2 pt-2">
-                  <Button type="submit" variant="accent" size="sm" className="flex-1">
+                  <Button type="submit" variant="accent" size="sm" className="flex-1" loading={isPending}>
                     Add Item
                   </Button>
                   <Button type="button" variant="outline" size="sm" onClick={() => setAddingNew(false)}>
@@ -244,12 +259,20 @@ export function PortfolioPageWrapper({ items }: Props) {
         description={`Are you sure you want to delete "${itemToDelete?.title}"?`}
         onConfirm={() => {
           if (itemToDelete) {
+            showNotification("loading", "Deleting item...");
             startTransition(async () => {
-              await deletePortfolioItem(itemToDelete.id);
+              try {
+                await deletePortfolioItem(itemToDelete.id);
+                showNotification("success", "Item deleted successfully!");
+                router.refresh();
+              } catch (error) {
+                showNotification("error", error instanceof Error ? error.message : "Failed to delete item");
+              }
             });
           }
         }}
       />
     </div>
+    </>
   );
 }

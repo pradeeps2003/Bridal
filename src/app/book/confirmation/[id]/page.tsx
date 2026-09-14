@@ -3,15 +3,15 @@ import { MessageCircle } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { PayNowButton, StatusBadge } from "@/components/booking/payment-button";
+import { CustomerCancelButton } from "@/components/booking/customer-cancel";
+import { StatusBadge } from "@/components/booking/payment-button";
 import { UpiPayment } from "@/components/booking/upi-payment";
 import { Button } from "@/components/ui/button";
+import { CANCELLATION_POLICY_SUMMARY } from "@/lib/booking/cancellation";
 import { getPublicBooking } from "@/lib/data/bookings";
 import { formatCurrency } from "@/lib/utils";
 import { getPaymentSettings, getSiteSettings } from "@/lib/data/settings";
-import { getClientEnv } from "@/lib/env";
 import { getBookingPayments } from "@/lib/payments/confirm";
-import { isRazorpayConfigured } from "@/lib/payments/razorpay";
 import type { BookingStatus } from "@/types";
 
 interface PageProps {
@@ -48,11 +48,10 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
   const canPay =
     ["ADMIN_APPROVED", "PAYMENT_PENDING"].includes(status) && Number(booking.advance) > 0;
   const canPayUpi = canPay && Boolean(upiId);
-  const razorpayKey = getClientEnv().NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
-  const canPayRazorpay = canPay && isRazorpayConfigured() && Boolean(razorpayKey);
   const pendingUpi = payments.find(
     (payment) => payment.gateway === "upi" && payment.status === "PENDING",
   );
+  const advancePaid = payments.some((payment) => payment.status === "CAPTURED");
 
   const pkg = booking.packages as { name: string; pricing_type?: string } | undefined;
   const svc = booking.services as { name: string } | undefined;
@@ -163,21 +162,6 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
             </div>
           )}
 
-          {canPayRazorpay && customer && (
-            <div className="mt-8 space-y-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-                Pay online
-              </p>
-              <PayNowButton
-                bookingId={id}
-                amount={Number(booking.advance)}
-                customerName={customer.full_name}
-                customerPhone={customer.phone}
-                razorpayKeyId={razorpayKey}
-              />
-            </div>
-          )}
-
           {canPayUpi && (
             <div className="mt-8">
               <UpiPayment
@@ -191,10 +175,22 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
             </div>
           )}
 
-          <div className="mt-8 text-center">
-            <Button variant="outline" asChild>
-              <Link href="/">Back to Home</Link>
-            </Button>
+          <p className="mt-8 text-center text-xs leading-relaxed text-[var(--color-muted-foreground)]">
+            {CANCELLATION_POLICY_SUMMARY}
+          </p>
+
+          <div className="mt-4 space-y-3">
+            <CustomerCancelButton
+              bookingId={id}
+              status={status}
+              eventDate={booking.event_date}
+              advancePaid={advancePaid}
+            />
+            <div className="text-center">
+              <Button variant="outline" asChild>
+                <Link href="/">Back to Home</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </main>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getCouponDiscount, isCouponUsable } from "@/lib/pricing/coupon";
+import { getCheckoutSettings } from "@/lib/data/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: Request) {
@@ -13,6 +14,11 @@ export async function POST(request: Request) {
         { error: "Missing required fields: code, package_id, total_amount" },
         { status: 400 },
       );
+    }
+
+    const checkout = await getCheckoutSettings();
+    if (!checkout.coupons_enabled) {
+      return NextResponse.json({ error: "Coupons are disabled at checkout." }, { status: 400 });
     }
 
     const supabase = createAdminClient();

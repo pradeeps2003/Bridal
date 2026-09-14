@@ -3,6 +3,7 @@
 import {
   Calendar,
   Clock,
+  FileText,
   Gift,
   ImageIcon,
   LayoutDashboard,
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 export type AdminMenuIcon =
   | "dashboard"
+  | "about"
   | "calendar"
   | "enquiries"
   | "clock"
@@ -51,6 +53,7 @@ type AdminNavProps = {
 
 const ICONS: Record<AdminMenuIcon, LucideIcon> = {
   dashboard: LayoutDashboard,
+  about: FileText,
   calendar: Calendar,
   enquiries: MessageSquare,
   clock: Clock,

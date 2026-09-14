@@ -50,7 +50,7 @@ export async function POST(request: Request) {
       phone,
       message:
         `Hi ${name}! We received your enquiry at Glow with Rubi.\n\n` +
-        `We'll get back to you within 4–6 hours. In the meantime, feel free to browse our packages at glowwithrubi.com/packages.`,
+        `We'll get back to you within 4–6 hours. In the meantime, browse packages at https://rubi-makeovers.vercel.app/packages.`,
       templateKey: "contact_received",
     });
 

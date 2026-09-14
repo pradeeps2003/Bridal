@@ -3,6 +3,32 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 
+function copyResponseCookies(from: NextResponse, to: NextResponse) {
+  from.cookies.getAll().forEach((cookie) => to.cookies.set(cookie));
+  return to;
+}
+
+function clearInvalidAuthCookies(request: NextRequest, response: NextResponse) {
+  request.cookies.getAll().forEach(({ name }) => {
+    if (name.startsWith("sb-") && name.includes("-auth-token")) {
+      response.cookies.delete(name);
+    }
+  });
+}
+
+async function userIsAdmin(
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string,
+) {
+  const { data } = await supabase
+    .from("admins")
+    .select("id")
+    .eq("id", userId)
+    .eq("is_active", true)
+    .maybeSingle();
+  return Boolean(data?.id);
+}
+
 export async function updateSession(request: NextRequest) {
   const config = getSupabasePublicConfig();
   let response = NextResponse.next({ request });
@@ -28,44 +54,66 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
+
+  if (
+    authError?.message.toLowerCase().includes("invalid refresh token") ||
+    authError?.message.toLowerCase().includes("refresh token not found")
+  ) {
+    clearInvalidAuthCookies(request, response);
+  }
 
   const { pathname } = request.nextUrl;
   const isAdminRoute = pathname.startsWith("/admin");
   const isAccountRoute = pathname.startsWith("/account");
   const isLoginRoute = pathname === "/admin/login";
-  const isCustomerLoginRoute = pathname === "/login" || pathname === "/signup";
+  const isCustomerAuthRoute =
+    pathname === "/login" || pathname === "/signup" || pathname === "/forgot-password";
 
-  // Protect admin routes
+  const admin = user ? await userIsAdmin(supabase, user.id) : false;
+
   if (isAdminRoute && !isLoginRoute && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin/login";
     loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    return copyResponseCookies(response, NextResponse.redirect(loginUrl));
   }
 
-  // Redirect logged-in admin away from login
-  if (isLoginRoute && user) {
+  // Public-site logins are customers. Do not bounce them around /admin.
+  if (isAdminRoute && !isLoginRoute && user && !admin) {
+    const accountUrl = request.nextUrl.clone();
+    accountUrl.pathname = "/account";
+    accountUrl.search = "";
+    return copyResponseCookies(response, NextResponse.redirect(accountUrl));
+  }
+
+  if (isLoginRoute && user && admin) {
     const adminUrl = request.nextUrl.clone();
     adminUrl.pathname = "/admin";
     adminUrl.search = "";
-    return NextResponse.redirect(adminUrl);
+    return copyResponseCookies(response, NextResponse.redirect(adminUrl));
   }
 
-  // Protect customer account routes
+  if (isLoginRoute && user && !admin) {
+    const accountUrl = request.nextUrl.clone();
+    accountUrl.pathname = "/account";
+    accountUrl.search = "";
+    return copyResponseCookies(response, NextResponse.redirect(accountUrl));
+  }
+
   if (isAccountRoute && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    return copyResponseCookies(response, NextResponse.redirect(loginUrl));
   }
 
-  // Redirect logged-in customers away from login/signup
-  if (isCustomerLoginRoute && user) {
-    const accountUrl = request.nextUrl.clone();
-    accountUrl.pathname = "/account";
-    accountUrl.search = "";
-    return NextResponse.redirect(accountUrl);
+  if (isCustomerAuthRoute && user) {
+    const nextUrl = request.nextUrl.clone();
+    nextUrl.pathname = admin ? "/admin" : "/account";
+    nextUrl.search = "";
+    return copyResponseCookies(response, NextResponse.redirect(nextUrl));
   }
 
   return response;

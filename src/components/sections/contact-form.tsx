@@ -2,23 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 
 import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 export function ContactForm() {
-  const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [feedback, setFeedback] = useState<{ title: string; message: string } | null>(null);
+  const [state, setState] = useState<"idle" | "loading" | "success">("idle");
+  const toast = useToast();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setState("loading");
-    setErrorMsg("");
 
     const form = e.currentTarget;
     const data = {
@@ -43,12 +42,12 @@ export function ContactForm() {
         window.location.href = `https://wa.me/${adminWaFormatted}?text=${text}`;
       } else {
         setState("success");
+        toast.success("Message sent successfully!", "We'll get back to you shortly.");
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong";
-      setErrorMsg(message);
-      setFeedback({ title: "Message could not be sent", message });
-      setState("error");
+      toast.error("Failed to send message", message);
+      setState("idle");
     }
   }
 
@@ -70,14 +69,7 @@ export function ContactForm() {
   }
 
   return (
-    <>
     <form onSubmit={handleSubmit} className="space-y-4">
-      {state === "error" && (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400">
-          {errorMsg || "Failed to send message. Please try again."}
-        </p>
-      )}
-
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
@@ -101,23 +93,9 @@ export function ContactForm() {
         />
       </div>
 
-      <Button variant="modern" size="lg" type="submit" className="h-11 w-full" disabled={state === "loading"}>
-        {state === "loading" ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Sending…
-          </span>
-        ) : (
-          "Send question"
-        )}
+      <Button variant="modern" size="lg" type="submit" className="h-11 w-full" loading={state === "loading"}>
+        Send question
       </Button>
     </form>
-    <FeedbackDialog
-      open={!!feedback}
-      title={feedback?.title ?? ""}
-      message={feedback?.message ?? ""}
-      onClose={() => setFeedback(null)}
-    />
-    </>
   );
 }

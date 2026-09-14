@@ -32,7 +32,7 @@ export function NotificationDelivery({ delivery }: { delivery: DeliveryLog[] }) 
             </div>
             <div>
               <p className="text-xs font-medium text-[var(--color-muted-foreground)]">Delivered</p>
-              <p className="mt-1 font-[family-name:var(--font-heading)] text-2xl tabular-nums">{delivered}</p>
+              <p className="mt-1 font-numeric text-2xl">{delivered}</p>
             </div>
           </div>
         </div>
@@ -43,7 +43,7 @@ export function NotificationDelivery({ delivery }: { delivery: DeliveryLog[] }) 
             </div>
             <div>
               <p className="text-xs font-medium text-[var(--color-muted-foreground)]">Sending</p>
-              <p className="mt-1 font-[family-name:var(--font-heading)] text-2xl tabular-nums">{sending}</p>
+              <p className="mt-1 font-numeric text-2xl">{sending}</p>
             </div>
           </div>
         </div>
@@ -54,7 +54,7 @@ export function NotificationDelivery({ delivery }: { delivery: DeliveryLog[] }) 
             </div>
             <div>
               <p className="text-xs font-medium text-[var(--color-muted-foreground)]">Failed</p>
-              <p className="mt-1 font-[family-name:var(--font-heading)] text-2xl tabular-nums">{failed}</p>
+              <p className="mt-1 font-numeric text-2xl">{failed}</p>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ export function NotificationDelivery({ delivery }: { delivery: DeliveryLog[] }) 
                 
                 <time 
                   dateTime={event.sentAt ?? event.createdAt} 
-                  className="text-[var(--color-muted-foreground)] tabular-nums"
+                  className="font-numeric text-[var(--color-muted-foreground)]"
                 >
                   {new Date(event.sentAt ?? event.createdAt).toLocaleString("en-IN", { 
                     dateStyle: "short", 
