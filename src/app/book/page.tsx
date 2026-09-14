@@ -13,7 +13,7 @@ import {
 } from "@/lib/data/settings";
 import { getActiveServices } from "@/lib/data/services";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache for 5 minutes (packages/services change rarely)
 
 export const metadata = {
   title: "Book bridal makeup",
@@ -26,7 +26,7 @@ export default async function BookPage() {
   const [services, packages, addons, bookingSettings, paymentSettings, serviceSettings, checkoutSettings, businessSettings] =
     await Promise.all([
       getActiveServices(),
-      getActivePackages(),
+      getActivePackages({ limit: 100 }), // Reduced limit for faster load
       getActiveAddons(),
       getBookingSettings(),
       getPaymentSettings(),
