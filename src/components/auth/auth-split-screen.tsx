@@ -1,7 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
-import { Sparkles } from "lucide-react";
 
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 
 export const AUTH_IMAGES = {
@@ -42,12 +41,7 @@ export function AuthSplitScreen({
     <div className={cn("grid min-h-svh bg-[var(--color-background)] lg:grid-cols-2", className)}>
       <div className="relative isolate flex flex-col">
         <div className="flex items-center justify-between gap-4 px-6 py-5 sm:px-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-[var(--color-accent)]">
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-            <span className="font-[family-name:var(--font-heading)] text-xl text-[var(--color-foreground)]">
-              Glow with Rubi
-            </span>
-          </Link>
+          <BrandLogo />
           {headerRight}
         </div>
 

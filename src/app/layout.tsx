@@ -24,13 +24,17 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Glow with Rubi | Bridal Makeup in Pollachi, Coimbatore & Tamil Nadu",
     template: "%s | Glow with Rubi",
   },
   description: SEO_DESCRIPTION,
   keywords: [...SEO_KEYWORDS],
-  metadataBase: new URL(getSiteUrl()),
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION }
     : undefined,
@@ -50,10 +54,10 @@ export const metadata: Metadata = {
     description: SEO_DESCRIPTION,
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/logo.png",
         width: 1200,
-        height: 630,
-        alt: "Glow with Rubi bridal makeup in Pollachi and Tamil Nadu",
+        height: 800,
+        alt: "Glow with Rubi makeup artist logo",
       },
     ],
   },
@@ -61,6 +65,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Glow with Rubi | Bridal Makeup in Pollachi, Coimbatore & Tamil Nadu",
     description: SEO_DESCRIPTION,
+    images: ["/logo.png"],
   },
 };
 
@@ -87,7 +92,7 @@ export default async function RootLayout({
       className={`${cormorant.variable} ${montserrat.variable} w-full`}
     >
       <head>
-        <link rel="icon" href="/favicon.png" />
+        <link rel="icon" href="/logo.png" />
       </head>
       <body className="min-h-screen antialiased w-full overflow-x-hidden">
         <JsonLd />

@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 export function AuthCard({
   title,
@@ -15,12 +14,7 @@ export function AuthCard({
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="mb-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-[var(--color-accent)]">
-          <Sparkles className="h-5 w-5" aria-hidden="true" />
-          <span className="font-[family-name:var(--font-heading)] text-2xl text-[var(--color-foreground)]">
-            Glow with Rubi
-          </span>
-        </Link>
+        <BrandLogo className="justify-center" />
         <h1 className="mt-5 font-[family-name:var(--font-heading)] text-3xl sm:text-4xl">{title}</h1>
         <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">{subtitle}</p>
       </div>

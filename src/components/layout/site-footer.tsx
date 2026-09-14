@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { BrandLogo } from "@/components/brand/brand-logo";
+
 const DEVELOPER = {
   name: "Pradeep",
   email: "gokulpradeep2003@gmail.com",
@@ -48,7 +50,7 @@ export function SiteFooter() {
       <div className="container-wide px-4 py-12 sm:px-6">
         <div className="mb-10 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
           <div>
-            <p className="font-[family-name:var(--font-heading)] text-4xl italic text-[var(--color-accent)]">Glow with Rubi</p>
+            <BrandLogo className="h-20 max-h-20 sm:h-24 sm:max-h-24" />
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/65">
               Premium bridal HD makeup from Pollachi. Home and venue service in Coimbatore, Tiruppur, Udumalpet, Valparai, and across Tamil Nadu — saree draping, jewellery setting, reception and engagement looks.
             </p>

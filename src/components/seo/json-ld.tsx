@@ -24,7 +24,7 @@ export async function JsonLd() {
     url: siteUrl,
     telephone: settings.phone,
     email: settings.email || undefined,
-    image: `${siteUrl}/og-image.jpg`,
+    image: `${siteUrl}/logo.png`,
     sameAs: instagram ? [instagram] : undefined,
     address: {
       "@type": "PostalAddress",

@@ -1,11 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Menu, Sparkles, X } from "lucide-react";
-import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { AdminNav, type AdminMenuItem } from "@/components/admin/admin-nav";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
@@ -102,16 +102,13 @@ export function MobileAdminMenu({ items, account }: MobileAdminMenuProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-(--color-border) bg-(--color-card) px-3 sm:px-4 lg:hidden">
-        <Link href="/admin" className="flex min-w-0 items-center gap-2" aria-label="Admin dashboard">
-          <Sparkles className="h-5 w-5 shrink-0 text-(--color-accent)" aria-hidden="true" />
-          <span className="truncate font-[family-name:var(--font-heading)] text-lg font-semibold text-(--color-foreground)">
-            Glow with Rubi
-          </span>
+      <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-(--color-border) bg-(--color-card) px-3 sm:px-4 lg:hidden">
+        <div className="flex min-w-0 items-center gap-2">
+          <BrandLogo href="/admin" className="h-11 max-h-11" label="Admin dashboard" />
           <span className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-(--color-muted-foreground)">
             Admin
           </span>
-        </Link>
+        </div>
 
         <div className="flex shrink-0 items-center gap-1">
           <ThemeToggle />

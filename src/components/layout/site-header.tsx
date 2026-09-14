@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, MessageCircle, Sparkles, X } from "lucide-react";
+import { Menu, MessageCircle, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getWhatsAppUrl, resolveWhatsAppNumber } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
@@ -55,18 +56,8 @@ export function SiteHeader({ className }: { className?: string }) {
           className,
         )}
       >
-        <div className="container-wide flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6 lg:px-10">
-          <Link href="/" className="group flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[var(--color-accent)] sm:h-6 sm:w-6" />
-            <div className="flex flex-col">
-              <span className="font-[family-name:var(--font-heading)] text-base tracking-tight text-[var(--color-foreground)] sm:text-lg">
-                Glow with Rubi
-              </span>
-              <span className="hidden uppercase tracking-[0.2em] text-[var(--color-muted-foreground)] sm:block sm:text-[9px]">
-                Premium Makeup Artistry
-              </span>
-            </div>
-          </Link>
+        <div className="container-wide flex h-16 items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-10">
+          <BrandLogo priority className="h-14 max-h-14 sm:h-16 sm:max-h-16" />
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
             {navLinks.map((link) => {

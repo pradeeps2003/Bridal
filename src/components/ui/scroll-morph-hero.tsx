@@ -208,7 +208,7 @@ export default function ScrollMorphHero() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full bg-[var(--color-background)] overflow-hidden pt-20"
+      className="relative w-full h-full bg-[var(--color-background)] overflow-hidden pt-20 sm:pt-24"
     >
       {/* Subtle burgundy+gold ambient tint */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,hsl(345_55%_22%/0.06),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,hsl(345_50%_45%/0.10),transparent)]" />

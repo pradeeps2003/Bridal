@@ -1,14 +1,13 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AdminAccountFooter, type AdminIdentity } from "@/components/admin/admin-account-footer";
+import { AdminRealtime } from "@/components/admin/admin-realtime";
 import { AdminNav, type AdminMenuItem } from "@/components/admin/admin-nav";
 import { MobileAdminMenu } from "@/components/admin/mobile-admin-menu";
 import { getCurrentAdmin } from "@/lib/data/admin";
 import { getUnreadEnquiryCount } from "@/lib/data/bookings";
 import type { AdminRole } from "@/types";
-import { Sparkles } from "lucide-react";
-import { AdminRealtime } from "@/components/admin/admin-realtime";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const ADMIN_MENU: readonly AdminMenuItem[] = [
@@ -79,15 +78,10 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         />
 
         <header className="hidden h-16 shrink-0 items-center border-b border-(--color-border) bg-(--color-card) px-4 sm:px-6 lg:flex">
-          <Link href="/admin" className="flex items-center gap-2" aria-label="Admin dashboard">
-            <Sparkles className="h-5 w-5 text-(--color-accent)" aria-hidden="true" />
-            <span className="font-[family-name:var(--font-heading)] text-xl font-semibold text-(--color-foreground)">
-              Glow with Rubi
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.16em] text-(--color-muted-foreground)">
-              Admin
-            </span>
-          </Link>
+          <BrandLogo href="/admin" className="h-12 max-h-12" label="Admin dashboard" />
+          <span className="ml-3 text-[10px] uppercase tracking-[0.16em] text-(--color-muted-foreground)">
+            Admin
+          </span>
           <div className="ml-auto flex items-center gap-3">
             <ThemeToggle />
             <AdminRealtime />

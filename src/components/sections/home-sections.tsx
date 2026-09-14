@@ -32,7 +32,7 @@ const POPULAR_TYPES = new Set(["popular", "most_ordered", "premium"]);
 export function HeroSection({ className }: { className?: string }) {
   return (
     <section
-      className={`relative isolate overflow-hidden bg-[var(--color-background)] pt-20 ${className ?? ""}`}
+      className={`relative isolate overflow-hidden bg-[var(--color-background)] pt-20 sm:pt-24 ${className ?? ""}`}
       aria-label="Hero"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,hsl(345_55%_22%/0.10),transparent_55%)] dark:bg-[radial-gradient(ellipse_at_50%_0%,hsl(40_65%_55%/0.10),transparent_55%)]" />
