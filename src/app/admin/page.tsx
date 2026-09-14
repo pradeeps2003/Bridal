@@ -10,7 +10,7 @@ export default async function AdminDashboardPage() {
   const date = new Date().toISOString().slice(0, 10);
   const [stats, todayBookings] = await Promise.all([
     getDashboardStats(),
-    getBookings({ fromDate: date, toDate: date, limit: 50 }),
+    getBookings({ fromDate: date, toDate: date, limit: 30 }), // Reduced for faster load
   ]);
   const connected = isSupabaseConfigured();
 
