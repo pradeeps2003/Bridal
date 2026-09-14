@@ -649,6 +649,47 @@ export async function updateAllSettingsAction(formData: FormData) {
   revalidatePath("/reset-password");
 }
 
+export async function updateBrandImagesSettingsAction(formData: FormData) {
+  const { admin } = await requireAdmin("settings.manage");
+  const existing = await getSiteSettings();
+  const showcaseSlots = Number(formData.get("hero_image_slots") || 0);
+  const showcaseImageUrls = await resolveSettingsImageList(
+    formData,
+    "hero_image_file_",
+    "hero_image_current_",
+    showcaseSlots,
+  );
+
+  await updateSiteSetting(
+    "business",
+    {
+      name: existing.business_name,
+      phone: existing.phone,
+      whatsapp: existing.whatsapp,
+      instagram: existing.instagram,
+      email: existing.email,
+      address: existing.address,
+      google_review_url: existing.google_review_url,
+      admin_login_image_url: await resolveSettingsImage(
+        formData,
+        "admin_login_image_file",
+        existing.admin_login_image_url,
+      ),
+      hero_image_urls: showcaseImageUrls,
+      footer_image_urls: showcaseImageUrls,
+    },
+    admin.id,
+  );
+
+  revalidatePath("/admin/images");
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/login");
+  revalidatePath("/login");
+  revalidatePath("/signup");
+  revalidatePath("/forgot-password");
+  revalidatePath("/reset-password");
+}
+
 const adminRoleSchema = z.object({
   admin_id: z.string().uuid("Admin id is invalid"),
   role: z.enum(["owner", "staff"]),

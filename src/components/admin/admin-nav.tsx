@@ -32,6 +32,7 @@ export type AdminMenuIcon =
   | "coupons"
   | "reviews"
   | "portfolio"
+  | "images"
   | "settings";
 
 export type AdminMenuItem = {
@@ -63,6 +64,7 @@ const ICONS: Record<AdminMenuIcon, LucideIcon> = {
   coupons: Tag,
   reviews: Star,
   portfolio: ImageIcon,
+  images: ImageIcon,
   settings: Settings,
 };
 
