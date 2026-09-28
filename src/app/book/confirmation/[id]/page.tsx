@@ -126,15 +126,17 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
                   We&apos;ve received your request! You can tap below to send the details directly to Rubi on WhatsApp, or wait for admin approval.
                 </p>
               </div>
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-emerald-700 min-h-[48px]"
-              >
-                <MessageCircle className="h-5 w-5" />
-                Send Request Details via WhatsApp
-              </a>
+              <div className="flex justify-center">
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Send via WhatsApp
+                </a>
+              </div>
             </div>
           )}
 
@@ -143,15 +145,17 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
               <p className="text-center text-sm text-[var(--color-muted-foreground)]">
                 Custom quote request received. We&apos;ll contact you with pricing details.
               </p>
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 font-semibold text-white shadow-md transition-all hover:bg-emerald-700 min-h-[48px]"
-              >
-                <MessageCircle className="h-5 w-5" />
-                Send Quote Request via WhatsApp
-              </a>
+              <div className="flex justify-center">
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-emerald-500 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Send Quote Request via WhatsApp
+                </a>
+              </div>
             </div>
           )}
 
@@ -174,10 +178,6 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
               />
             </div>
           )}
-
-          <p className="mt-8 text-center text-xs leading-relaxed text-[var(--color-muted-foreground)]">
-            {CANCELLATION_POLICY_SUMMARY}
-          </p>
 
           <div className="mt-4 space-y-3">
             <CustomerCancelButton

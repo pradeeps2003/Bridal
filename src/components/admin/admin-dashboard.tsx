@@ -81,7 +81,7 @@ export function AdminDashboard({
 
       {/* Revenue KPI + avg */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
+        <Link href="/admin/bookings" className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm transition-all hover:shadow-md hover:border-[var(--color-accent)]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring block">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-sm font-medium text-[var(--color-muted-foreground)]">Today&apos;s Revenue</p>
@@ -92,13 +92,13 @@ export function AdminDashboard({
                 avg ₹{Math.round(averageBookingValue).toLocaleString("en-IN")} per booking
               </p>
             </div>
-            <div className="rounded-md bg-emerald-500/10 p-2.5 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+            <div className="rounded-md bg-emerald-500/10 p-2.5 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 shrink-0">
               <DollarSign className="h-4 w-4" />
             </div>
           </div>
-        </div>
+        </Link>
 
-        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm">
+        <Link href="/admin/bookings?status=HELD" className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm transition-all hover:shadow-md hover:border-amber-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring block">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <p className="text-sm font-medium text-[var(--color-muted-foreground)]">Pending Approval</p>
@@ -109,11 +109,11 @@ export function AdminDashboard({
                 {stats.pendingRequests > 0 ? "⚠ Review required" : "All clear"}
               </p>
             </div>
-            <div className={`rounded-md p-2.5 ${stats.pendingRequests > 0 ? "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"}`}>
+            <div className={`rounded-md p-2.5 shrink-0 ${stats.pendingRequests > 0 ? "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" : "bg-[var(--color-muted)] text-[var(--color-muted-foreground)]"}`}>
               <AlertCircle className="h-4 w-4" />
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Bucket Cards — simple count buckets */}
