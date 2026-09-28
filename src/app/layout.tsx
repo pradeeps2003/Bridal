@@ -37,8 +37,11 @@ export const metadata: Metadata = {
   description: SEO_DESCRIPTION,
   applicationName: "Glow with Rubi",
   keywords: [...SEO_KEYWORDS],
+  alternates: {
+    canonical: "/",
+  },
   icons: {
-    icon: "/logo.png",
+    icon: "/favicon.png",
     apple: "/logo.png",
   },
   verification: GSC_VERIFICATION
@@ -50,11 +53,15 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   openGraph: {
     type: "website",
     locale: "en_IN",
+    url: getSiteUrl(),
     siteName: "Glow with Rubi",
     title: "Glow with Rubi | Bridal Makeup in Pollachi, Coimbatore & Tamil Nadu",
     description: SEO_DESCRIPTION,
@@ -62,8 +69,8 @@ export const metadata: Metadata = {
       {
         url: "/logo.png",
         width: 1200,
-        height: 800,
-        alt: "Glow with Rubi makeup artist logo",
+        height: 630,
+        alt: "Glow with Rubi — bridal makeup artist in Pollachi, Coimbatore & Tamil Nadu",
       },
     ],
   },
@@ -73,6 +80,7 @@ export const metadata: Metadata = {
     description: SEO_DESCRIPTION,
     images: ["/logo.png"],
   },
+  category: "beauty",
 };
 
 export const viewport: Viewport = {

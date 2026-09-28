@@ -12,6 +12,7 @@ export const metadata = {
   description:
     "Bridal, reception, engagement, and party makeup photos from Pollachi, Coimbatore, and weddings across Tamil Nadu by Glow with Rubi.",
   keywords: ["bridal makeup portfolio Pollachi", "wedding makeup photos Coimbatore"],
+  alternates: { canonical: "/portfolio" },
 };
 
 interface PageProps {

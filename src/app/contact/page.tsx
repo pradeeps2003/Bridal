@@ -9,6 +9,7 @@ export const metadata = {
   description:
     "WhatsApp Glow with Rubi for bridal makeup in Pollachi, Coimbatore, Tiruppur, and Tamil Nadu. Home service and venue bookings.",
   keywords: ["makeup artist Pollachi WhatsApp", "contact bridal makeup Coimbatore"],
+  alternates: { canonical: "/contact" },
 };
 
 export default async function ContactPage() {

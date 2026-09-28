@@ -14,6 +14,7 @@ export const metadata = {
   description:
     "Meet Nithiya Rubini of Glow with Rubi (Rubi Makeovers) — skin-first HD bridal makeup artist in Pollachi, travelling to Coimbatore and Tamil Nadu.",
   keywords: ["Nithiya Rubini", "Rubi Makeovers Pollachi", "bridal makeup artist Pollachi"],
+  alternates: { canonical: "/about" },
 };
 
 const PILLAR_ICONS = [ShieldCheck, Award, Heart] as const;

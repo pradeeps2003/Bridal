@@ -2,6 +2,8 @@ import { PageHero, PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { FAQAccordion } from "@/components/ui/faq-accordion";
 import { ScrollAnimate } from "@/components/ui/scroll-animate";
+import { FaqSchema } from "@/components/seo/faq-schema";
+import { BreadcrumbSchema } from "@/components/seo/breadcrumb-schema";
 import Link from "next/link";
 
 export const revalidate = 300; // Cache for 5 minutes
@@ -11,6 +13,7 @@ export const metadata = {
   description:
     "Bridal makeup booking, home service travel in Tamil Nadu, cancellation, and HD products — Glow with Rubi in Pollachi and Coimbatore.",
   keywords: ["bridal makeup FAQ Pollachi", "home service makeup Tamil Nadu"],
+  alternates: { canonical: "/faq" },
 };
 
 const FAQ_SECTIONS = [
@@ -67,6 +70,8 @@ const FAQ_SECTIONS = [
 export default function FaqPage() {
   return (
     <PageShell>
+      <FaqSchema sections={FAQ_SECTIONS} />
+      <BreadcrumbSchema items={[{ name: "FAQ", href: "/faq" }]} />
       <PageHero
         badge="Help"
         title="Common questions"

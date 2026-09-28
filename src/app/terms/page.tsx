@@ -3,6 +3,8 @@ import { PageShell } from "@/components/layout/page-shell";
 export const metadata = {
   title: "Terms of Service | Glow with Rubi",
   description: "Terms and conditions for using Glow with Rubi bridal makeup services.",
+  alternates: { canonical: "/terms" },
+  robots: { index: false, follow: true },
 };
 
 export default function TermsOfServicePage() {

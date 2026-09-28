@@ -3,6 +3,8 @@ import { PageShell } from "@/components/layout/page-shell";
 export const metadata = {
   title: "Privacy Policy | Glow with Rubi",
   description: "Learn how we collect, use, and protect your personal information.",
+  alternates: { canonical: "/privacy" },
+  robots: { index: false, follow: true },
 };
 
 export default function PrivacyPolicyPage() {

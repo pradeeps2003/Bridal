@@ -18,6 +18,7 @@ export const metadata = {
     "HD makeup price Coimbatore",
     "wedding makeup packages Tamil Nadu",
   ],
+  alternates: { canonical: "/packages" },
 };
 
 interface PageProps {

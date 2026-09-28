@@ -20,6 +20,7 @@ export const metadata = {
   description:
     "Book HD bridal, reception, or party makeup in Pollachi, Coimbatore, Udumalpet, Tiruppur, or anywhere in Tamil Nadu. Home and venue dates online.",
   keywords: ["book bridal makeup Pollachi", "wedding makeup booking Coimbatore", "home service makeup Tamil Nadu"],
+  alternates: { canonical: "/book" },
 };
 
 export default async function BookPage() {
