@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Smartphone, QrCode, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 import { formatCurrency } from "@/lib/utils";
 
 interface UpiPaymentProps {
@@ -29,6 +30,7 @@ export function UpiPayment({
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(alreadySubmitted);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const note = `GlowRubi-${bookingRef}`;
   const amountPaise = amount; // amount in rupees
@@ -236,6 +238,7 @@ export function UpiPayment({
               const json = await res.json();
               if (!res.ok) throw new Error(json.error ?? "Could not submit payment details");
               setSubmitted(true);
+              setShowSuccessPopup(true);
             } catch (error) {
               setSubmitError(error instanceof Error ? error.message : "Could not submit payment details");
             } finally {
@@ -262,7 +265,8 @@ export function UpiPayment({
             name="screenshot"
             type="file"
             accept="image/*"
-            className="w-full text-sm text-[var(--color-muted-foreground)]"
+            required
+            className="w-full text-sm text-[var(--color-muted-foreground)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-accent)] file:text-[var(--color-foreground)] hover:file:bg-[var(--color-accent)]/80"
           />
           {submitError ? <p className="text-sm text-[var(--color-destructive)]">{submitError}</p> : null}
           <Button type="submit" variant="accent" disabled={submitting || utr.trim().length < 4}>
@@ -270,6 +274,17 @@ export function UpiPayment({
           </Button>
         </form>
       )}
+
+      <FeedbackDialog
+        open={showSuccessPopup}
+        title="Payment Details Received"
+        message="Thank you! We have received your payment reference and screenshot. We will verify the transaction and confirm your booking soon."
+        tone="success"
+        autoClose={true}
+        autoCloseDuration={5000}
+        showDismissButton={true}
+        onClose={() => setShowSuccessPopup(false)}
+      />
     </div>
   );
 }
