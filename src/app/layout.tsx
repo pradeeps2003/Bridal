@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant, Montserrat } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Analytics } from "@/components/seo/analytics";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -12,19 +12,19 @@ import { getSiteUrl } from "@/lib/seo/site-url";
 
 const { GSC_VERIFICATION } = getServerEnv();
 
-const cormorant = Cormorant({
-  subsets: ["latin"],
+const cormorant = localFont({
+  src: "./fonts/cormorant-variable.woff2",
   variable: "--font-heading",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: "400 700",
   preload: true,
 });
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
+const montserrat = localFont({
+  src: "./fonts/montserrat-variable.woff2",
   variable: "--font-body",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700"],
+  weight: "300 700",
   preload: true,
 });
 
