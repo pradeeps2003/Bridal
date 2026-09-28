@@ -7,7 +7,7 @@ import { FeedbackDialog } from "@/components/ui/feedback-dialog";
 import { Button } from "@/components/ui/button";
 import type { BookingStatus } from "@/types";
 
-import { MessageCircle } from "lucide-react";
+import { CircleAlert, MessageCircle } from "lucide-react";
 
 interface BookingAction {
   label: string;
@@ -32,9 +32,18 @@ export function BookingStatusActions({
 }: BookingStatusActionsProps) {
   const router = useRouter();
   const [pendingStatus, setPendingStatus] = useState<BookingStatus | "BALANCE" | null>(null);
+  const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   const [feedback, setFeedback] = useState<{ title: string; message: string; tone?: "success" | "error" | "info" } | null>(null);
 
   async function updateStatus(status: BookingStatus) {
+    if (status === "CANCELLED" && !showConfirmCancel) {
+      setShowConfirmCancel(true);
+      return;
+    }
+    if (status === "CANCELLED" && showConfirmCancel) {
+      setShowConfirmCancel(false);
+    }
+    
     setPendingStatus(status);
     setFeedback(null);
     try {
@@ -57,7 +66,7 @@ export function BookingStatusActions({
       const messageMap: Record<string, string> = {
         ADMIN_APPROVED: "Booking has been approved successfully. You can notify the customer via WhatsApp below.",
         REJECTED: "Booking has been rejected.",
-        CANCELLED: "Booking cancelled. If advance was paid, decide the refund yourself and send it on UPI if you approve it.",
+        CANCELLED: "Booking has been cancelled.",
         CONFIRMED: "Booking and payment confirmed successfully.",
         COMPLETED: "Service completed successfully.",
       };
@@ -117,7 +126,7 @@ export function BookingStatusActions({
 
   return (
     <>
-      <div className="flex flex-wrap gap-2 sm:gap-3" aria-live="polite">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3" aria-live="polite">
         {actions.map((action) => (
           <Button
             key={`${action.status}-${action.label}`}
@@ -156,13 +165,43 @@ export function BookingStatusActions({
           </Button>
         ) : null}
       </div>
+      {/* Admin Cancellation Modal */}
+      {showConfirmCancel && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md overflow-hidden rounded-xl bg-[var(--color-card)] shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-start gap-4">
+                <div className="rounded-full bg-red-100 p-2 dark:bg-red-900/30 shrink-0">
+                  <CircleAlert className="h-6 w-6 text-red-600 dark:text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold font-[family-name:var(--font-heading)]">Cancel Booking</h3>
+                  <p className="mt-2 text-sm text-[var(--color-muted-foreground)] leading-relaxed">
+                    Are you sure you want to cancel this booking? This action will release the date, and the customer will be notified.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 bg-[var(--color-muted)]/30 px-6 py-4 justify-end">
+              <Button variant="outline" type="button" onClick={() => setShowConfirmCancel(false)}>
+                No, go back
+              </Button>
+              <Button type="button" onClick={() => updateStatus("CANCELLED")} className="bg-red-600 hover:bg-red-700 text-white shadow-sm border border-red-700">
+                Yes, cancel booking
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <FeedbackDialog
         open={!!feedback}
         title={feedback?.title ?? ""}
         message={feedback?.message ?? ""}
         tone={feedback?.tone ?? "success"}
         autoClose={true}
-        autoCloseDuration={10000}
+        autoCloseDuration={3000}
+        showDismissButton={true}
         onClose={() => setFeedback(null)}
       />
     </>
