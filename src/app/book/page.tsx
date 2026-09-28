@@ -36,7 +36,7 @@ export default async function BookPage() {
     ]);
 
   return (
-    <PageShell>
+    <PageShell compactFooter>
       <div className="container-narrow px-6">
         <PageHero
           badge="4-step booking"

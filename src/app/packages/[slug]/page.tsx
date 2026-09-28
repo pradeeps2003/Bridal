@@ -49,7 +49,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
     .slice(0, 3);
 
   return (
-    <PageShell>
+    <PageShell compactFooter>
       <ScrollAnimate animation="fade-up">
         <section className="container-narrow mb-10 px-4 sm:px-6">
           <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-accent)]">

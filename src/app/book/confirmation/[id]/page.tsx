@@ -37,7 +37,7 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
             <Link href="/book">Start a new booking</Link>
           </Button>
         </main>
-        <SiteFooter />
+        <SiteFooter compact />
       </>
     );
   }
@@ -194,7 +194,7 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
           </div>
         </div>
       </main>
-      <SiteFooter />
+      <SiteFooter compact />
     </>
   );
 }

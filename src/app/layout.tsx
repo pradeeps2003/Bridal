@@ -35,6 +35,7 @@ export const metadata: Metadata = {
     template: "%s | Glow with Rubi",
   },
   description: SEO_DESCRIPTION,
+  applicationName: "Glow with Rubi",
   keywords: [...SEO_KEYWORDS],
   icons: {
     icon: "/logo.png",

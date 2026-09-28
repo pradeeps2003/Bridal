@@ -2,14 +2,20 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { AmbientBlobs } from "@/components/ui/ambient-blobs";
 
-export function PageShell({ children }: { children: React.ReactNode }) {
+export function PageShell({
+  children,
+  compactFooter = false,
+}: {
+  children: React.ReactNode;
+  compactFooter?: boolean;
+}) {
   return (
     <>
       <SiteHeader />
       <main className="relative min-h-screen booking-gradient-wash pb-16 pt-20 sm:pt-24 lg:pt-28 w-full overflow-x-hidden">
         {children}
       </main>
-      <SiteFooter />
+      <SiteFooter compact={compactFooter} />
     </>
   );
 }

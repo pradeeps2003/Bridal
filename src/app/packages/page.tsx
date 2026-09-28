@@ -46,7 +46,7 @@ export default async function PackagesPage({ searchParams }: PageProps) {
   }));
 
   return (
-    <PageShell>
+    <PageShell compactFooter>
       {/* Grain texture + sparkle hero area */}
       <div className="relative overflow-hidden">
         <GrainOverlay />
