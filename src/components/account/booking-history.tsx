@@ -62,7 +62,11 @@ function HistoryRow({ booking, openByDefault }: { booking: Booking; openByDefaul
             <div><p className="text-[var(--color-muted-foreground)]">Balance</p><p className="font-numeric mt-1">{formatCurrency(Number(booking.balance) || 0)}</p></div>
           </div>
           {booking.notes && <p className="border-t border-[var(--color-border)] pt-3 text-xs text-[var(--color-muted-foreground)]"><span className="font-medium text-[var(--color-foreground)]">Notes:</span> {booking.notes}</p>}
-          <BookingStatusRealtime bookingId={booking.id} initialStatus={booking.status as BookingStatus}>
+          <BookingStatusRealtime
+            bookingId={booking.id}
+            initialStatus={booking.status as BookingStatus}
+            initialBalance={Number(booking.balance) || 0}
+          >
             {(status) => (
               <div className="space-y-3">
                 <StatusTrack status={status} />

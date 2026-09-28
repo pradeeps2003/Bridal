@@ -6,6 +6,7 @@ import {
   notifyCustomerStatusChange,
   sendCriticalStatusSms,
 } from "@/lib/notifications/orchestrator";
+import { syncBookingBalance } from "@/lib/payments/confirm";
 import { verifyWebhookSignature } from "@/lib/payments/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
         .from("bookings")
         .update({ status: "CONFIRMED" })
         .eq("id", payment.booking_id);
+      await syncBookingBalance(payment.booking_id);
 
       const booking = payment.bookings as {
         event_date: string;

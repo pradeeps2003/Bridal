@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { StatusTrack } from "@/components/account/status-track";
 import { StatusBadge } from "@/components/booking/payment-button";
@@ -10,6 +11,7 @@ import type { BookingStatus } from "@/types";
 interface BookingStatusRealtimeProps {
   bookingId: string;
   initialStatus: BookingStatus;
+  initialBalance?: number;
   showTrack?: boolean;
   children?: (status: BookingStatus) => React.ReactNode;
 }
@@ -17,11 +19,14 @@ interface BookingStatusRealtimeProps {
 export function BookingStatusRealtime({
   bookingId,
   initialStatus,
+  initialBalance,
   showTrack = false,
   children,
 }: BookingStatusRealtimeProps) {
   const [status, setStatus] = useState<BookingStatus>(initialStatus);
   const statusRef = useRef(initialStatus);
+  const balanceRef = useRef(initialBalance);
+  const router = useRouter();
   const [connection, setConnection] = useState<"connected" | "paused">("paused");
   const [announcement, setAnnouncement] = useState("");
 
@@ -36,10 +41,17 @@ export function BookingStatusRealtime({
         { event: "UPDATE", schema: "public", table: "bookings", filter: `id=eq.${bookingId}` },
         (payload) => {
           const nextStatus = payload.new.status as BookingStatus;
-          if (!nextStatus || nextStatus === statusRef.current) return;
-          statusRef.current = nextStatus;
-          setStatus(nextStatus);
-          setAnnouncement(`Booking status updated to ${nextStatus.replaceAll("_", " ")}.`);
+          if (nextStatus && nextStatus !== statusRef.current) {
+            statusRef.current = nextStatus;
+            setStatus(nextStatus);
+            setAnnouncement(`Booking status updated to ${nextStatus.replaceAll("_", " ")}.`);
+          }
+
+          const nextBalance = Number(payload.new.balance);
+          if (Number.isFinite(nextBalance) && nextBalance !== balanceRef.current) {
+            balanceRef.current = nextBalance;
+            router.refresh();
+          }
         },
       )
       .subscribe((state) => {
@@ -49,7 +61,7 @@ export function BookingStatusRealtime({
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [bookingId]);
+  }, [bookingId, initialBalance, router]);
 
   return (
     <>

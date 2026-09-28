@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 
-export const BRAND_LOGO = "/logo.png";
+export const BRAND_LOGO = "/logo-optimized.webp";
 
 export function BrandLogo({
   href = "/",
@@ -20,7 +20,7 @@ export function BrandLogo({
 }) {
   const image = (
     <Image
-      src={`${BRAND_LOGO}?v=5`}
+      src={BRAND_LOGO}
       alt="Glow with Rubi makeup artist"
       width={727}
       height={644}

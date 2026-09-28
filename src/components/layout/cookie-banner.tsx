@@ -10,6 +10,9 @@ import { readCookiePreferences, writeCookiePreferences } from "@/lib/privacy/coo
 export function CookieBanner() {
   const pathname = usePathname();
   const [showBanner, setShowBanner] = useState(false);
+  const hasOptionalTracking = Boolean(
+    process.env.NEXT_PUBLIC_GA4_ID || process.env.NEXT_PUBLIC_META_PIXEL_ID,
+  );
 
   useEffect(() => {
     if (pathname?.startsWith("/admin")) {
@@ -19,7 +22,7 @@ export function CookieBanner() {
     setShowBanner(!readCookiePreferences());
   }, [pathname]);
 
-  if (!showBanner) return null;
+  if (!hasOptionalTracking || !showBanner) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-lg">

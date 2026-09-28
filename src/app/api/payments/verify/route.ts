@@ -6,6 +6,7 @@ import {
   notifyCustomerStatusChange,
   sendCriticalStatusSms,
 } from "@/lib/notifications/orchestrator";
+import { syncBookingBalance } from "@/lib/payments/confirm";
 import { verifyRazorpaySignature } from "@/lib/payments/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -45,10 +46,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Payment record not found" }, { status: 404 });
     }
 
+    const paymentBookingId = String(payment.booking_id);
     await supabase
       .from("bookings")
       .update({ status: "CONFIRMED", hold_expires_at: null })
-      .eq("id", booking_id);
+      .eq("id", paymentBookingId);
+    await syncBookingBalance(paymentBookingId);
 
     const booking = payment.bookings as {
       event_date: string;
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
     };
 
     const notificationContext = {
-      bookingId: booking_id,
+      bookingId: paymentBookingId,
       customerName: booking.customers.full_name,
       customerPhone: booking.customers.whatsapp || booking.customers.phone,
       customerEmail: booking.customers.email,
@@ -76,7 +79,7 @@ export async function POST(request: Request) {
       notifyAdminsOfPayment(notificationContext),
     ]);
 
-    return NextResponse.json({ data: { success: true, booking_id } });
+    return NextResponse.json({ data: { success: true, booking_id: paymentBookingId } });
   } catch (err) {
     console.error("[payments/verify] error:", err);
     return NextResponse.json({ error: "Verification failed" }, { status: 500 });

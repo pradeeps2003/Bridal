@@ -8,13 +8,15 @@ export async function capturePendingPayments(bookingId: string) {
     .eq("booking_id", bookingId)
     .eq("status", "PENDING");
 
-  if (!pending?.length) return [];
+  const ids = (pending ?? []).map((row) => row.id);
+  if (ids.length) {
+    await supabase
+      .from("payments")
+      .update({ status: "CAPTURED", updated_at: new Date().toISOString() })
+      .in("id", ids);
+  }
 
-  const ids = pending.map((row) => row.id);
-  await supabase
-    .from("payments")
-    .update({ status: "CAPTURED", updated_at: new Date().toISOString() })
-    .in("id", ids);
+  await syncBookingBalance(bookingId);
 
   return ids;
 }
@@ -37,6 +39,30 @@ export function remainingBalance(
     .filter((row) => row.status === "CAPTURED")
     .reduce((sum, row) => sum + Number(row.amount), 0);
   return Math.max(0, Number(total) - captured);
+}
+
+export async function syncBookingBalance(bookingId: string) {
+  const supabase = createAdminClient();
+  const [bookingResult, paymentsResult] = await Promise.all([
+    supabase.from("bookings").select("total").eq("id", bookingId).single(),
+    supabase.from("payments").select("amount, status").eq("booking_id", bookingId),
+  ]);
+
+  if (bookingResult.error || !bookingResult.data) {
+    throw new Error(bookingResult.error?.message ?? "Booking not found");
+  }
+  if (paymentsResult.error) {
+    throw new Error(paymentsResult.error.message);
+  }
+
+  const balance = remainingBalance(Number(bookingResult.data.total), paymentsResult.data ?? []);
+  const { error } = await supabase
+    .from("bookings")
+    .update({ balance, updated_at: new Date().toISOString() })
+    .eq("id", bookingId);
+
+  if (error) throw new Error(error.message);
+  return balance;
 }
 
 export async function captureBalancePayment(

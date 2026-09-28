@@ -40,14 +40,14 @@ export function HeroSection({
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 pt-8 text-center sm:px-6 sm:pt-10">
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           className="mb-4 text-[11px] font-semibold uppercase tracking-[0.38em] text-[var(--color-accent)] sm:text-[10px] sm:tracking-[0.42em]"
         >
           Glow with Rubi · Pollachi
         </motion.p>
         <motion.h1
-          initial={{ opacity: 0, y: 24 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 }}
           className="font-[family-name:var(--font-heading)] text-[2.5rem] font-medium leading-[0.95] text-[var(--color-foreground)] sm:text-5xl md:text-6xl"
@@ -56,7 +56,7 @@ export function HeroSection({
           <span className="mt-1 block italic text-[var(--color-accent)]">glow on camera.</span>
         </motion.h1>
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
           className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[var(--color-muted-foreground)] sm:text-sm"

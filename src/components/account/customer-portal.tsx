@@ -162,6 +162,7 @@ export function CustomerPortal({
                   <BookingStatusRealtime
                     bookingId={upcomingBooking.id}
                     initialStatus={upcomingBooking.status as BookingStatus}
+                    initialBalance={Number(upcomingBooking.balance) || 0}
                   >
                     {(status) => (
                       <span className="rounded-full bg-[var(--color-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-foreground)]">
@@ -209,6 +210,7 @@ export function CustomerPortal({
                 <BookingStatusRealtime
                   bookingId={upcomingBooking.id}
                   initialStatus={upcomingBooking.status as BookingStatus}
+                  initialBalance={Number(upcomingBooking.balance) || 0}
                   showTrack
                 >
                   {() => null}

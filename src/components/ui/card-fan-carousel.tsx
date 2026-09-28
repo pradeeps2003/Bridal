@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 
 export interface CardItem {
@@ -74,6 +75,7 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
   const prevVisible = useRef<Set<number>>(new Set());
 
   const totalCards = cards.length;
+  const priorityImageIndex = totalCards > MAX_VISIBLE ? HALF - 1 : totalCards >> 1;
   // Enable pagination even with 2 or more cards on mobile
   const needsPagination = totalCards > 1;
   const [centerIndex, setCenterIndex] = useState(needsPagination ? (totalCards > MAX_VISIBLE ? HALF : 0) : totalCards >> 1);
@@ -333,12 +335,14 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
           {cards.map((card, index) => {
             const image = (
               <div className="relative h-full w-full overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={card.imgUrl}
-                  loading={index < 4 ? "eager" : "lazy"}
+                  fill
+                  priority={index === priorityImageIndex}
+                  quality={65}
+                  sizes="(max-width: 480px) 168px, (max-width: 640px) 192px, (max-width: 768px) 208px, (max-width: 1024px) 232px, 256px"
                   alt={card.alt || `Look ${index + 1}`}
-                  className="absolute inset-0 z-10 h-full w-full object-cover"
+                  className="absolute inset-0 z-10 object-cover"
                 />
               </div>
             );
