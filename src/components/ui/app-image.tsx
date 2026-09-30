@@ -12,7 +12,7 @@ type AppImageProps = ImageProps & {
   frameClassName?: string;
 };
 
-export function AppImage({ className, frameClassName, alt, onLoad, fill, quality = 70, ...props }: AppImageProps) {
+export function AppImage({ className, frameClassName, alt, onLoad, fill, quality = 90, ...props }: AppImageProps) {
   const [loaded, setLoaded] = useState(false);
 
   return (

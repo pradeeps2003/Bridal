@@ -19,10 +19,10 @@ export type Service = {
 };
 
 const FALLBACKS = [
-  "https://images.unsplash.com/photo-1519741497674-611481863552?w=900&q=80",
-  "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=900&q=80",
-  "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=900&q=80",
-  "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=900&q=80",
+  "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=1600&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=1600&q=90&auto=format&fit=crop",
 ];
 
 export function packagesToServices(packages: Package[]): Service[] {

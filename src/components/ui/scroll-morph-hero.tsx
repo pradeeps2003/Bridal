@@ -90,26 +90,26 @@ function FlipCard({ src, index, target, label }: FlipCardProps) {
 
 // --- Bridal Image Set — Unsplash ---
 const IMAGES = [
-  { src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80", label: "Bridal Glam" },
-  { src: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=400&q=80", label: "Reception Look" },
-  { src: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&q=80", label: "HD Makeup" },
-  { src: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80", label: "Bridal Makeup" },
-  { src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80", label: "Occasion Look" },
-  { src: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&q=80", label: "Party Makeup" },
-  { src: "https://images.unsplash.com/photo-1560066984-138daaa8a5e4?w=400&q=80", label: "Saree Drape" },
-  { src: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=400&q=80", label: "Engagement" },
-  { src: "https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?w=400&q=80", label: "Floral Bride" },
-  { src: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=400&q=80", label: "Wedding Day" },
-  { src: "https://images.unsplash.com/photo-1519741347686-c1e0aadf4611?w=400&q=80", label: "Classic Bridal" },
-  { src: "https://images.unsplash.com/photo-1511285560929-80b456503681?w=400&q=80", label: "South Indian" },
-  { src: "https://images.unsplash.com/photo-1606216794079-73e0f3bb0e1f?w=400&q=80", label: "Hair Styling" },
-  { src: "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=400&q=80", label: "Jewellery Look" },
-  { src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80", label: "Portrait Glow" },
-  { src: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80", label: "Maternity" },
-  { src: "https://images.unsplash.com/photo-1521146764736-56c929d59c83?w=400&q=80", label: "Mehendi" },
-  { src: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&q=80", label: "Reception" },
-  { src: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80", label: "Bold Look" },
-  { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80", label: "Pastel Bride" },
+  { src: "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=90&auto=format&fit=crop", label: "Bridal Glam" },
+  { src: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1200&q=90&auto=format&fit=crop", label: "Reception Look" },
+  { src: "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=1200&q=90&auto=format&fit=crop", label: "HD Makeup" },
+  { src: "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=1200&q=90&auto=format&fit=crop", label: "Bridal Makeup" },
+  { src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200&q=90&auto=format&fit=crop", label: "Occasion Look" },
+  { src: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1200&q=90&auto=format&fit=crop", label: "Party Makeup" },
+  { src: "https://images.unsplash.com/photo-1560066984-138daaa8a5e4?w=1200&q=90&auto=format&fit=crop", label: "Saree Drape" },
+  { src: "https://images.unsplash.com/photo-1522338242992-e1a54906a8da?w=1200&q=90&auto=format&fit=crop", label: "Engagement" },
+  { src: "https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?w=1200&q=90&auto=format&fit=crop", label: "Floral Bride" },
+  { src: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=1200&q=90&auto=format&fit=crop", label: "Wedding Day" },
+  { src: "https://images.unsplash.com/photo-1519741347686-c1e0aadf4611?w=1200&q=90&auto=format&fit=crop", label: "Classic Bridal" },
+  { src: "https://images.unsplash.com/photo-1511285560929-80b456503681?w=1200&q=90&auto=format&fit=crop", label: "South Indian" },
+  { src: "https://images.unsplash.com/photo-1606216794079-73e0f3bb0e1f?w=1200&q=90&auto=format&fit=crop", label: "Hair Styling" },
+  { src: "https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=1200&q=90&auto=format&fit=crop", label: "Jewellery Look" },
+  { src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1200&q=90&auto=format&fit=crop", label: "Portrait Glow" },
+  { src: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&q=90&auto=format&fit=crop", label: "Maternity" },
+  { src: "https://images.unsplash.com/photo-1521146764736-56c929d59c83?w=1200&q=90&auto=format&fit=crop", label: "Mehendi" },
+  { src: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=1200&q=90&auto=format&fit=crop", label: "Reception" },
+  { src: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=1200&q=90&auto=format&fit=crop", label: "Bold Look" },
+  { src: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=90&auto=format&fit=crop", label: "Pastel Bride" },
 ];
 
 const TOTAL_IMAGES = IMAGES.length;
@@ -208,7 +208,7 @@ export default function ScrollMorphHero() {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full bg-[var(--color-background)] overflow-hidden pt-20 sm:pt-24"
+      className="relative w-full h-full bg-[var(--color-background)] overflow-hidden pt-28 sm:pt-32"
     >
       {/* Subtle burgundy+gold ambient tint */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,hsl(345_55%_22%/0.06),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_0%,hsl(345_50%_45%/0.10),transparent)]" />

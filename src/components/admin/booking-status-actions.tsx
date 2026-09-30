@@ -43,7 +43,7 @@ export function BookingStatusActions({
     if (status === "CANCELLED" && showConfirmCancel) {
       setShowConfirmCancel(false);
     }
-    
+
     setPendingStatus(status);
     setFeedback(null);
     try {
@@ -54,7 +54,7 @@ export function BookingStatusActions({
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "The booking status could not be updated.");
-      
+
       const titleMap: Record<string, string> = {
         ADMIN_APPROVED: "Booking Approved ✓",
         REJECTED: "Booking Rejected",
@@ -184,10 +184,10 @@ export function BookingStatusActions({
             </div>
             <div className="flex gap-3 bg-[var(--color-muted)]/30 px-6 py-4 justify-end">
               <Button variant="outline" type="button" onClick={() => setShowConfirmCancel(false)}>
-                No, go back
+                go back
               </Button>
               <Button type="button" onClick={() => updateStatus("CANCELLED")} className="bg-red-600 hover:bg-red-700 text-white shadow-sm border border-red-700">
-                Yes, cancel booking
+                Yes, cancel
               </Button>
             </div>
           </div>

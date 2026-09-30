@@ -5,12 +5,12 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PORTFOLIO_IMAGES = [
-  "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&q=80",
-  "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&q=80",
-  "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=400&q=80",
-  "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&q=80",
-  "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=400&q=80",
-  "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&q=80",
+  "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1200&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=1200&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=1200&q=90&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1200&q=90&auto=format&fit=crop",
 ];
 
 export function HeroCarousel() {
@@ -44,7 +44,7 @@ export function HeroCarousel() {
             fill
             className="object-cover"
             priority={currentIndex === 0}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
           />
         </motion.div>
       </AnimatePresence>

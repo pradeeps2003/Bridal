@@ -33,7 +33,7 @@ export default async function AccountPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-screen bg-[var(--color-background)] pb-20 pt-24 lg:pt-32">
+      <main className="min-h-screen bg-[var(--color-background)] pb-20 pt-28 lg:pt-32">
         <div className="container-wide px-4 sm:px-6">
           <CustomerPortal
             email={user.email ?? ""}

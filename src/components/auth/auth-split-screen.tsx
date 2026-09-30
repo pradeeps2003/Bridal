@@ -77,7 +77,7 @@ function AuthPanelImage({ src, alt, priority = false }: { src: string; alt: stri
       alt={alt}
       fill
       priority={priority}
-      quality={70}
+      quality={90}
       sizes="(max-width: 1024px) 100vw, 50vw"
       className="object-cover"
     />

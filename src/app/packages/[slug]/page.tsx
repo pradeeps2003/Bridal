@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1519741497674-611481863552?w=1400&q=80";
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&q=90&auto=format&fit=crop";
 
 export default async function PackageDetailPage({ params }: PageProps) {
   const { slug } = await params;

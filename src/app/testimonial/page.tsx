@@ -22,7 +22,7 @@ export default async function TestimonialPage({
     return (
       <>
         <SiteHeader />
-        <main className="min-h-screen bg-[var(--color-background)] pt-24 pb-16 lg:pt-32">
+        <main className="min-h-screen bg-[var(--color-background)] pt-28 pb-16 lg:pt-32">
           <div className="container-narrow px-6 text-center">
             <h1 className="font-[family-name:var(--font-heading)] text-4xl mb-4">
               Invalid Link
@@ -40,7 +40,7 @@ export default async function TestimonialPage({
   return (
     <>
       <SiteHeader />
-      <main className="min-h-screen bg-[var(--color-background)] pt-24 pb-16 lg:pt-32">
+      <main className="min-h-screen bg-[var(--color-background)] pt-28 pb-16 lg:pt-32">
         <div className="container-narrow px-6">
           <ScrollAnimate animation="fade-down" delay={0.1}>
             <div className="max-w-md mx-auto">

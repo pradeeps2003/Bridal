@@ -31,7 +31,7 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
     return (
       <>
         <SiteHeader />
-        <main className="min-h-screen pt-24 section-padding text-center">
+        <main className="min-h-screen pt-28 section-padding text-center">
           <h1 className="font-[family-name:var(--font-heading)] text-3xl">Booking not found</h1>
           <Button variant="accent" className="mt-6" asChild>
             <Link href="/book">Start a new booking</Link>
@@ -69,7 +69,7 @@ export default async function BookingConfirmationPage({ params }: PageProps) {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-screen pt-20 sm:pt-24 section-padding w-full">
+      <main className="min-h-screen pt-28 sm:pt-32 section-padding w-full">
         <div className="mx-auto max-w-xl px-4 sm:px-6 w-full">
           <div className="text-center">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-accent)]">

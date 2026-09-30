@@ -54,7 +54,7 @@ export default async function PortfolioPage({ searchParams }: PageProps) {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-screen bg-gradient-to-b from-[var(--color-muted)]/20 via-[var(--color-background)] to-[var(--color-muted)]/20 dark:from-[var(--color-muted)]/10 dark:via-[var(--color-background)] dark:to-[var(--color-muted)]/10 pt-24 pb-12 lg:pt-28">
+      <main className="min-h-screen bg-gradient-to-b from-[var(--color-muted)]/20 via-[var(--color-background)] to-[var(--color-muted)]/20 dark:from-[var(--color-muted)]/10 dark:via-[var(--color-background)] dark:to-[var(--color-muted)]/10 pt-28 pb-12 lg:pt-32">
         {/* Header */}
         <ScrollAnimate animation="fade-down" delay={0.1}>
           <section className="container-narrow px-6 text-center space-y-4 mb-8">

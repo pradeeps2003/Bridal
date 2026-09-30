@@ -12,7 +12,7 @@ export function PageShell({
   return (
     <>
       <SiteHeader />
-      <main className="relative min-h-screen booking-gradient-wash pb-16 pt-20 sm:pt-24 lg:pt-28 w-full overflow-x-hidden">
+      <main className="relative min-h-screen booking-gradient-wash pb-16 pt-28 sm:pt-32 lg:pt-36 w-full overflow-x-hidden">
         {children}
       </main>
       <SiteFooter compact={compactFooter} />

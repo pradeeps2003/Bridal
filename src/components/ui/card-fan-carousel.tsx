@@ -339,8 +339,8 @@ export default function SocialCards({ cards, autoPlay = true, intervalMs = 4200 
                   src={card.imgUrl}
                   fill
                   priority={index === priorityImageIndex}
-                  quality={70}
-                  sizes="(max-width: 480px) 168px, (max-width: 640px) 192px, (max-width: 768px) 208px, (max-width: 1024px) 232px, 256px"
+                  quality={90}
+                  sizes="(max-width: 480px) 336px, (max-width: 640px) 384px, (max-width: 768px) 416px, (max-width: 1024px) 464px, 512px"
                   alt={card.alt || `Look ${index + 1}`}
                   className="absolute inset-0 z-10 object-cover"
                 />

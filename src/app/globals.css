@@ -252,7 +252,8 @@
   }
 
   .section-padding {
-    padding-block: clamp(4rem, 8vw, 7rem);
+    padding-top: clamp(6rem, 10vw, 9rem);
+    padding-bottom: clamp(4rem, 8vw, 7rem);
     padding-inline: clamp(1rem, 4vw, 2rem);
     width: 100%;
     max-width: 100%;
