@@ -409,76 +409,7 @@ export async function deleteAddon(id: string) {
   revalidatePath("/");
 }
 
-// --- Portfolio ---
 
-const portfolioSchema = z.object({
-  title: z.string().optional(),
-  category: z.enum(["Bridal", "Reception", "Engagement", "Party", "Maternity", "Hair"]),
-  image_url: z.string().url().optional().or(z.literal("")),
-  video_url: z.string().url().optional().or(z.literal("")),
-  is_published: z.coerce.boolean().default(false),
-  display_order: z.coerce.number().int().min(0).default(0),
-});
-
-export async function createPortfolioItem(formData: FormData) {
-  const { admin } = await requireAdmin("content.manage");
-  const parsed = portfolioSchema.parse(Object.fromEntries(formData));
-  const imageFile = formData.get("image_file");
-  if (!isUploadFile(imageFile)) throw new Error("Please choose a portfolio image.");
-  const imageUrl = (await uploadAdminImage(imageFile, "portfolio")).publicUrl;
-  const supabase = createAdminClient();
-
-  const { error } = await supabase.from("portfolio_items").insert({
-    ...parsed,
-    image_url: imageUrl,
-    video_url: parsed.video_url || null,
-  });
-
-  if (error) throw new Error(error.message);
-  await logAudit(admin.id, "create", "portfolio_items", null, parsed);
-  revalidatePath("/admin/portfolio");
-  revalidatePath("/portfolio");
-}
-
-export async function updatePortfolioItem(id: string, formData: FormData) {
-  const { admin } = await requireAdmin("content.manage");
-  const parsed = portfolioSchema.parse(Object.fromEntries(formData));
-  const supabase = createAdminClient();
-  const { data: existingItem, error: existingError } = await supabase
-    .from("portfolio_items")
-    .select("image_url, video_url")
-    .eq("id", id)
-    .single();
-  if (existingError || !existingItem) throw new Error(existingError?.message ?? "Portfolio item not found");
-
-  const imageFile = formData.get("image_file");
-  const imageUrl = isUploadFile(imageFile)
-    ? (await uploadAdminImage(imageFile, "portfolio")).publicUrl
-    : existingItem.image_url;
-
-  const { error } = await supabase
-    .from("portfolio_items")
-    .update({
-      ...parsed,
-      image_url: imageUrl,
-      video_url: parsed.video_url || existingItem.video_url || null,
-    })
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
-  await logAudit(admin.id, "update", "portfolio_items", id, parsed);
-  revalidatePath("/admin/portfolio");
-  revalidatePath("/portfolio");
-}
-
-export async function deletePortfolioItem(id: string) {
-  const { admin } = await requireAdmin("content.manage");
-  const supabase = createAdminClient();
-  const { error } = await supabase.from("portfolio_items").delete().eq("id", id);
-  if (error) throw new Error(error.message);
-  await logAudit(admin.id, "delete", "portfolio_items", id);
-  revalidatePath("/admin/portfolio");
-}
 
 // --- Settings ---
 

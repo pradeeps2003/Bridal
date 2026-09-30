@@ -40,16 +40,7 @@ export const PACKAGE_TYPES = [
 
 export type PackageType = (typeof PACKAGE_TYPES)[number];
 
-export const PORTFOLIO_CATEGORIES = [
-  "Bridal",
-  "Reception",
-  "Engagement",
-  "Party",
-  "Maternity",
-  "Hair",
-] as const;
 
-export type PortfolioCategory = (typeof PORTFOLIO_CATEGORIES)[number];
 
 export interface Service {
   id: string;
@@ -208,15 +199,7 @@ export interface Customer {
   whatsapp: string | null;
 }
 
-export interface PortfolioItem {
-  id: string;
-  title: string | null;
-  category: PortfolioCategory;
-  image_url: string | null;
-  video_url: string | null;
-  is_published: boolean;
-  display_order: number;
-}
+
 
 export interface TimeSlot {
   start_time: string;

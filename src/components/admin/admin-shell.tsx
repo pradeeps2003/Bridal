@@ -21,7 +21,7 @@ const ADMIN_MENU: readonly AdminMenuItem[] = [
   { href: "/admin/addons", label: "Add-ons", icon: "addons" },
   { href: "/admin/coupons", label: "Coupons", icon: "coupons" },
   { href: "/admin/testimonials", label: "Reviews", icon: "reviews" },
-  { href: "/admin/portfolio", label: "Portfolio", icon: "portfolio" },
+
   { href: "/admin/images", label: "Brand images", icon: "images", ownerOnly: true },
   {
     href: "/admin/settings",
